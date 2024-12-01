@@ -3,23 +3,73 @@ var obstacles = [];
 var player; // Le joueur
 var keys = {}; // Suivi des touches pressées
 var win = 0; // Variable de victoire (0 = pas de victoire, 1 = victoire)
-var goal = { x: 780, y: 700, size: 100 }; // Position et taille du cube noir (objectif)
 var niveau=1;
+var c;
+var ingame;
 
+const countdownElement = document.getElementById("countdown");
+// Définir la valeur initiale
+let countdownValue = 5;
+const countdownInterval = setInterval(updateCountdown, 1000);
+
+//classes-----------------------------------------------------------------
+class Player {
+    constructor(name,x,y,color){
+        this.name=name;
+        this.x=x;
+        this.y=y;
+        this.size=20;
+        this.color=color;
+        this.speed=5;
+        this.score=0;
+    }
+}
+
+class Obstacle {
+    constructor(x,y,size,move,kill){
+        this.x=x;
+        this.y=y;
+        this.size=size;
+        this.move=move;//true or false
+        this.color="black";
+        this.cankill=kill;//true or false
+    }
+}
+class Score{
+    constructor(f,s,t,l){
+        this.first=f;
+        this.second=s;
+        this.third=t;
+        this.last=l;
+    }
+}
+
+class ExitGate{
+    constructor(x,y,size){
+        this.x=x;
+        this.y=y;
+        this.size=size;
+        this.color="blue";
+    }
+}
+
+class Level{
+    constructor(i,d,eg,listO){
+        this.id=i;
+        this.difficulty=d;//1, 2 and 3
+        this.exitgate=eg;
+        this.obstacles=listO;
+    }
+}
+//------------------------------------------------------------------------
 window.onload = function init() {
     canvas = document.querySelector("#myCanvas");
     w = canvas.width; 
     h = canvas.height;  
     ctx = canvas.getContext('2d');
-  
-    // Initialiser le joueur
-    player = {
-        x: 50, // Position initiale X
-        y: 50, // Position initiale Y
-        size: 20, // Taille du carré
-        color: "black",
-        speed: 5, // Vitesse de déplacement
-    };
+
+    c = new ExitGate(130,130,50);
+    player = new Player("Toto",50,50,"red");
 
     // Gérer les événements clavier
     window.addEventListener("keydown", function(e) {
@@ -28,17 +78,58 @@ window.onload = function init() {
     window.addEventListener("keyup", function(e) {
         keys[e.key] = false;
     });
-
-    // Initialiser des obstacles pour le test
-    initObstacles();
-
-    mainLoop();
+    
+    ingame=false;
+    Menu();
 };
-function drawGoal() {
-    // Dessiner l'objectif (cube noir)
-    drawRect(goal.x, goal.y, goal.size, goal.size, "black");
+
+function Menu(){
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.font = "40px Arial";
+    ctx.fillStyle = "blue";
+    ctx.textAlign = "center";
+    ctx.fillText("Course Cube", w / 2, h / 2 - 50);
+    ctx.restore();
+
+    const startButton = document.getElementById("StartButton");
+    const exitButton = document.getElementById("ExitButton");
+    startButton.style.display = "block";
+    exitButton.style.display = "block";
+
+    startButton.addEventListener("click", function() {
+        ingame=true;
+        mainLoop();
+        
+    });
+    exitButton.addEventListener("click", function() {
+        ingame=false;
+        exitgame();
+    });
 }
 
+function exitgame(){
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.font = "40px Arial";
+    ctx.fillStyle = "blue";
+    ctx.textAlign = "center";
+    ctx.fillText("C fini", w / 2, h / 2 - 50);
+    ctx.restore();
+    cancelAnimationFrame(mainLoop);
+}
+
+function drawCircle(c){//print exitgate
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,c.size,0,2*Math.PI);
+    ctx.fillStyle=c.color;
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.restore();
+}
 
 function drawRect(x, y, width, height, c) {
     ctx.save();
@@ -47,26 +138,41 @@ function drawRect(x, y, width, height, c) {
     ctx.restore();
 }
 
-function updatePlayer() {
-    // Déplacement horizontal
-    if (keys["ArrowRight"] && player.x + player.size < w) {
-        player.x += player.speed;
-    }
-    if (keys["ArrowLeft"] && player.x > 0) {
-        player.x -= player.speed;
-    }
-
-    // Déplacement vertical
-    if (keys["ArrowDown"] && player.y + player.size < h) {
-        player.y += player.speed;
-    }
-    if (keys["ArrowUp"] && player.y > 0) {
-        player.y -= player.speed;
-    }
+function drawPlayer(player) {
+    drawRect(player.x, player.y, player.size, player.size, player.color);
 }
 
-function drawPlayer() {
-    drawRect(player.x, player.y, player.size, player.size, player.color);
+function updatePlayer(player) { //gere qu'un perso
+    let diagonalSpeed = player.speed / Math.sqrt(2);
+    //si horizontal et vertical en même temps
+    if ((keys["ArrowRight"] || keys["ArrowLeft"]) && (keys["ArrowDown"] || keys["ArrowUp"])) {
+        if (keys["ArrowRight"] && player.x + player.size < w) {
+            player.x += diagonalSpeed;
+        }
+        if (keys["ArrowLeft"] && player.x > 0) {
+            player.x -= diagonalSpeed;
+        }
+        if (keys["ArrowDown"] && player.y + player.size < h) {
+            player.y += diagonalSpeed;
+        }
+        if (keys["ArrowUp"] && player.y > 0) {
+            player.y -= diagonalSpeed;
+        }
+    }
+    else {
+        if (keys["ArrowRight"] && player.x + player.size < w) {
+            player.x += player.speed;
+        }
+        if (keys["ArrowLeft"] && player.x > 0) {
+            player.x -= player.speed;
+        }
+        if (keys["ArrowDown"] && player.y + player.size < h) {
+            player.y += player.speed;
+        }
+        if (keys["ArrowUp"] && player.y > 0) {
+            player.y -= player.speed;
+        }
+    }
 }
 
 function createMovingObstacle(x, y, width, height, c, direction, speed, type) {
@@ -195,8 +301,7 @@ function initObstacles() {
     }
 }
 
-
-function checkCollision(player, goal) {
+function checkCollision(player, goal) { // à modifier
     // Vérifier la collision entre le joueur et l'objectif
     if (
         player.x < goal.x + goal.size &&
@@ -211,7 +316,6 @@ function checkCollision(player, goal) {
     }
 }
 
-
 function afficheNiveau(niveau) {
     ctx.save();
     ctx.font = "20px Arial";
@@ -219,9 +323,6 @@ function afficheNiveau(niveau) {
     ctx.fillText(`Niveau : ${niveau}`, 10, 30);
     ctx.restore();
 }
-const countdownElement = document.getElementById("countdown");
-// Définir la valeur initiale
-let countdownValue = 5;
 
 // Fonction pour mettre à jour le compteur
 function updateCountdown() {
@@ -234,31 +335,26 @@ function updateCountdown() {
         countdownElement.textContent = "GO!"; // Afficher "GO!" ou autre
     }
 }
-const countdownInterval = setInterval(updateCountdown, 1000);
 
 function mainLoop() {
-    niveau=2;
+    niveau=1;
     countdownInterval;
-    // Effacer le canvas
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0,0,w,h);
     afficheNiveau(niveau);
     // Mettre à jour et dessiner les éléments
-    updatePlayer();
-    drawPlayer();
+    updatePlayer(player);
+    drawPlayer(player);
+    drawCircle(c);
 
-    // Dessiner les obstacles
+    // Dessiner les obstacles => inuile pour le moment
     obstacles.forEach(obstacle => {
         obstacle.update();
         obstacle.draw();
     });
 
-    // Dessiner le cube de l'objectif
-    drawGoal();
-    if (checkCollision(player, goal) === 0) {
-        // Code à exécuter si la collision est détectée, par exemple, afficher un message de victoire
-        console.log("Félicitations ! Vous avez atteint l'objectif !");
-        // Vous pouvez également ajouter du code pour arrêter le jeu ou changer le niveau ici
-    }
     // Continuer la boucle
-    requestAnimationFrame(mainLoop);
+    if (ingame){
+        requestAnimationFrame(mainLoop);
+    }
+    
 }
