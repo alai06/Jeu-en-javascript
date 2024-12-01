@@ -1,0 +1,55 @@
+#myCanvas{
+  border:1px solid black;
+}
+
+.niveau-container {
+  background-color: #ffffff;
+  border: 2px solid #0078d7;
+  border-radius: 8px;
+  padding: 20px 40px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.niveau-container p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.niveau-container p.niveau-haut {
+  color: #28a745; /* Vert pour un niveau élevé */
+}
+
+.niveau-container p.niveau-moyen {
+  color: #ffc107; /* Jaune pour un niveau moyen */
+}
+
+.niveau-container p.niveau-bas {
+  color: #dc3545; /* Rouge pour un niveau bas */
+}
+#countdown {
+    font-size: 5rem;
+    color: #333;
+    margin: 0;
+    animation: fadeInOut 1s infinite;
+    text-align: center;
+}
+
+/* Animation pour un effet d'apparition-disparition */
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+.counter-display {
+    text-align: center;
+    background: #ffffff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
