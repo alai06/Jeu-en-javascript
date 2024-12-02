@@ -14,7 +14,8 @@ const countdownInterval = setInterval(updateCountdown, 1000);
 
 //classes-----------------------------------------------------------------
 class Player {
-    constructor(name,x,y,color){
+    constructor(id,name,x,y,color){
+        this.id=id;
         this.name=name;
         this.x=x;
         this.y=y;
@@ -23,6 +24,45 @@ class Player {
         this.speed=5;
         this.score=0;
     }
+    draw(){
+        drawRect(this.x, this.y, this.size, this.size, this.color);
+    }
+
+    updatePlayer() { //gere qu'un perso
+        let diagonalSpeed = this.speed / Math.sqrt(2);
+        //si horizontal et vertical en même temps
+        if ((keys["ArrowRight"] || keys["ArrowLeft"]) && (keys["ArrowDown"] || keys["ArrowUp"])) {
+            if (keys["ArrowRight"] && this.x + this.size < w) {
+                this.x += diagonalSpeed;
+            }
+            if (keys["ArrowLeft"] && this.x -this.size/2> 10) {
+                
+                this.x -= diagonalSpeed;
+            }
+            if (keys["ArrowDown"] && this.y + this.size/2 < h) {
+                this.y += diagonalSpeed;
+            }
+            if (keys["ArrowUp"] && this.y -this.size/2> 0) {
+                this.y -= diagonalSpeed;
+            }
+        }
+        else {
+            if (keys["ArrowRight"] && this.x + this.size/2 < w) {
+                this.x += this.speed;
+            }
+            if (keys["ArrowLeft"] && this.x -this.size/2> 0) {
+                this.x -= this.speed;
+            }
+            if (keys["ArrowDown"] && this.y + this.size/2 < h) {
+                this.y += this.speed;
+            }
+            if (keys["ArrowUp"] && this.y -this.size/2> 0) {
+                this.y -= this.speed;
+            }
+        }
+        
+    }
+    
 }
 
 class Obstacle {
@@ -35,6 +75,7 @@ class Obstacle {
         this.cankill=kill;//true or false
     }
 }
+
 class Score{
     constructor(f,s,t,l){
         this.first=f;
@@ -49,7 +90,22 @@ class ExitGate{
         this.x=x;
         this.y=y;
         this.size=size;
-        this.color="blue";
+        this.color="white";
+    }
+    draw(){
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,2*Math.PI);
+        ctx.fillStyle=this.color;
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.restore();
+    }
+    modifyCoordExitGate(exitgate, x, y){
+        exitgate.x=x;
+        exitgate.y=y;
     }
 }
 
@@ -60,6 +116,9 @@ class Level{
         this.exitgate=eg;
         this.obstacles=listO;
     }
+    afficheLevel(){//on met tout les objets qu'on veut avoir et on changera avec les indices.
+
+    }
 }
 //------------------------------------------------------------------------
 window.onload = function init() {
@@ -68,8 +127,8 @@ window.onload = function init() {
     h = canvas.height;  
     ctx = canvas.getContext('2d');
 
-    c = new ExitGate(130,130,50);
-    player = new Player("Toto",50,50,"red");
+    c = new ExitGate(130,130,25);
+    player = new Player(1,"Toto",10,10,"red");
 
     // Gérer les événements clavier
     window.addEventListener("keydown", function(e) {
@@ -82,6 +141,13 @@ window.onload = function init() {
     ingame=false;
     Menu();
 };
+
+function drawRect(x, y, width, height, c) {
+    ctx.save();
+    ctx.fillStyle = c;
+    ctx.fillRect(x-1/2*width, y-1/2*height, width, height);
+    ctx.restore();
+}
 
 function Menu(){
     ctx.clearRect(0, 0, w, h);
@@ -116,63 +182,7 @@ function exitgame(){
     ctx.textAlign = "center";
     ctx.fillText("C fini", w / 2, h / 2 - 50);
     ctx.restore();
-    cancelAnimationFrame(mainLoop);
-}
-
-function drawCircle(c){//print exitgate
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(c.x,c.y,c.size,0,2*Math.PI);
-    ctx.fillStyle=c.color;
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "black";
-    ctx.stroke();
-    ctx.restore();
-}
-
-function drawRect(x, y, width, height, c) {
-    ctx.save();
-    ctx.fillStyle = c;
-    ctx.fillRect(x, y, width, height);
-    ctx.restore();
-}
-
-function drawPlayer(player) {
-    drawRect(player.x, player.y, player.size, player.size, player.color);
-}
-
-function updatePlayer(player) { //gere qu'un perso
-    let diagonalSpeed = player.speed / Math.sqrt(2);
-    //si horizontal et vertical en même temps
-    if ((keys["ArrowRight"] || keys["ArrowLeft"]) && (keys["ArrowDown"] || keys["ArrowUp"])) {
-        if (keys["ArrowRight"] && player.x + player.size < w) {
-            player.x += diagonalSpeed;
-        }
-        if (keys["ArrowLeft"] && player.x > 0) {
-            player.x -= diagonalSpeed;
-        }
-        if (keys["ArrowDown"] && player.y + player.size < h) {
-            player.y += diagonalSpeed;
-        }
-        if (keys["ArrowUp"] && player.y > 0) {
-            player.y -= diagonalSpeed;
-        }
-    }
-    else {
-        if (keys["ArrowRight"] && player.x + player.size < w) {
-            player.x += player.speed;
-        }
-        if (keys["ArrowLeft"] && player.x > 0) {
-            player.x -= player.speed;
-        }
-        if (keys["ArrowDown"] && player.y + player.size < h) {
-            player.y += player.speed;
-        }
-        if (keys["ArrowUp"] && player.y > 0) {
-            player.y -= player.speed;
-        }
-    }
+    cancelAnimationFrame(mainLoop);//inutile
 }
 
 function createMovingObstacle(x, y, width, height, c, direction, speed, type) {
@@ -301,18 +311,15 @@ function initObstacles() {
     }
 }
 
-function checkCollision(player, goal) { // à modifier
-    // Vérifier la collision entre le joueur et l'objectif
+function checkCollision(player, exitgate) { // à modifier
     if (
-        player.x < goal.x + goal.size &&
-        player.x + player.size > goal.x &&
-        player.y < goal.y + goal.size &&
-        player.y + player.size > goal.y
+        player.x < exitgate.x + exitgate.size &&
+        player.x + player.size > exitgate.x &&
+        player.y < exitgate.y + exitgate.size &&
+        player.y + player.size > exitgate.y
     ) {
         console.log("Collision détectée : Vous avez touché l'objectif !");
-        return 0; // Retourne 0 si la collision est détectée
-    } else {
-        return 1; // Retourne 1 si aucune collision n'est détectée
+        niveau+=1;
     }
 }
 
@@ -337,21 +344,20 @@ function updateCountdown() {
 }
 
 function mainLoop() {
-    niveau=1;
     countdownInterval;
     ctx.clearRect(0,0,w,h);
     afficheNiveau(niveau);
     // Mettre à jour et dessiner les éléments
-    updatePlayer(player);
-    drawPlayer(player);
-    drawCircle(c);
+    player.updatePlayer();
+    player.draw();
+    c.draw();
 
     // Dessiner les obstacles => inuile pour le moment
     obstacles.forEach(obstacle => {
         obstacle.update();
         obstacle.draw();
     });
-
+    checkCollision(player,c);
     // Continuer la boucle
     if (ingame){
         requestAnimationFrame(mainLoop);
