@@ -53,3 +53,26 @@
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
+.button-container {
+  display: flex; /* Utilise Flexbox pour organiser les boutons */
+  justify-content: space-between; /* Sépare les boutons uniformément */
+  margin-top: 10px; /* Espace au-dessus des boutons */
+  gap: 10px; /* Ajoute un espace de 10px entre les boutons */
+}
+
+#StartButton, #ExitButton {
+  flex: 1; /* Chaque bouton prend un espace égal */
+  text-decoration: none;
+  padding: 10px 0; /* Ajuste l'espacement interne */
+  font-family: Arial, sans-serif;
+  font-size: 1em;
+  color: #FFFFFF;
+  background-color: #1f497d; /* Couleur de fond des boutons */
+  border: 2px solid #FFFFFF; /* Bordure blanche */
+  border-radius: 0; /* Pas de bordure arrondie pour une apparence propre */
+  cursor: pointer;
+}
+
+#StartButton:hover, #ExitButton:hover {
+  background-color: #333333; /* Changement de couleur au survol */
+}
