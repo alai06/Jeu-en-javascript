@@ -3,7 +3,7 @@ var obstacles = [];
 var player; // Le joueur
 var keys = {}; // Suivi des touches pressées
 var win = 0; // Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=5;
+var niveau=1;
 var dernier_niv=9;
 var c;
 var ingame;
@@ -63,6 +63,10 @@ class Player {
             }
         }
         
+    }
+    resetPosition() {
+        this.x = 20;
+        this.y = 20;
     }
     
 }
@@ -129,7 +133,7 @@ window.onload = function init() {
     h = canvas.height;  
     ctx = canvas.getContext('2d');
 
-    c = new ExitGate(130,130,25);
+    c = new ExitGate(650,600,25);
     player = new Player(1,"Toto",10,10,"red");
 
     // Gérer les événements clavier
@@ -246,70 +250,6 @@ function initObstacles(niveau) {
             obstacles.push(createMovingObstacle(300, 100, 20, 150, "blue", "vertical", 0, "rectangle"));
             obstacles.push(createMovingObstacle(400, 300, 100, 20, "green", "horizontal", 0, "rectangle"));
             break;
-
-        case 4:
-            // Niveau 4 : obstacles verticaux avec plus de complexité
-            obstacles.push(createMovingObstacle(100, 0, 20, 200, "red", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 200, "blue", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 150, "green", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 100, 20, "purple", "horizontal", 0, "rectangle"));
-            break;
-
-        case 5:
-            // Niveau 5 : obstacles verticaux et horizontaux avec mouvements alternés
-            obstacles.push(createMovingObstacle(100, 0, 20, 100, "red", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 100, "blue", "horizontal", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 100, "green", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 20, 100, "purple", "horizontal", 4, "rectangle"));
-            obstacles.push(createMovingObstacle(600, 500, 20, 150, "orange", "vertical", 1, "rectangle"));
-            break;
-
-        case 6:
-            // Niveau 6 : obstacles plus nombreux et certains à mouvement plus rapide
-            obstacles.push(createMovingObstacle(100, 0, 20, 100, "red", "vertical", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 100, "blue", "horizontal", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 100, "green", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 20, 100, "purple", "horizontal", 4, "rectangle"));
-            obstacles.push(createMovingObstacle(600, 500, 20, 150, "orange", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(100, 400, 100, 20, "pink", "horizontal", 3, "rectangle"));
-            break;
-
-        case 7:
-            // Niveau 7 : obstacles qui se déplacent à des vitesses variées et ajout de chemins complexes
-            obstacles.push(createMovingObstacle(100, 0, 20, 100, "red", "vertical", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 100, "blue", "horizontal", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 100, "green", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 20, 100, "purple", "horizontal", 4, "rectangle"));
-            obstacles.push(createMovingObstacle(600, 500, 20, 150, "orange", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(100, 400, 100, 20, "pink", "horizontal", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(400, 200, 100, 20, "cyan", "vertical", 2, "rectangle"));
-            break;
-
-        case 8:
-            // Niveau 8 : ajout de plusieurs obstacles mobiles complexes (combinaison horizontaux et verticaux)
-            obstacles.push(createMovingObstacle(100, 0, 20, 100, "red", "vertical", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 100, "blue", "horizontal", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 100, "green", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 20, 100, "purple", "horizontal", 4, "rectangle"));
-            obstacles.push(createMovingObstacle(600, 500, 20, 150, "orange", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(100, 400, 100, 20, "pink", "horizontal", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(400, 200, 100, 20, "cyan", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(50, 600, 100, 20, "grey", "horizontal", 1, "rectangle"));
-            break;
-
-        default:
-            // Niveau par défaut pour les niveaux plus élevés
-            obstacles.push(createMovingObstacle(100, 0, 20, 100, "red", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 100, "blue", "horizontal", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(500, 50, 20, 100, "green", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(200, 300, 20, 100, "purple", "horizontal", 4, "rectangle"));
-            obstacles.push(createMovingObstacle(600, 500, 20, 150, "orange", "vertical", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(100, 400, 100, 20, "pink", "horizontal", 3, "rectangle"));
-            obstacles.push(createMovingObstacle(400, 200, 100, 20, "cyan", "vertical", 2, "rectangle"));
-            obstacles.push(createMovingObstacle(50, 600, 100, 20, "grey", "horizontal", 1, "rectangle"));
-            obstacles.push(createMovingObstacle(700, 700, 20, 100, "brown", "vertical", 2, "rectangle"));
-            break;
-
         
     }
 }
@@ -346,54 +286,83 @@ function updateCountdown() {
     }
 }
 function initialiserNiveau(niv) {
+    player.resetPosition();
     ingame = true;
     checkcol = false;
 }
 
 function verifierPassageNiveau() {
-    // Vérifiez ici si les conditions pour changer de niveau sont remplies
     if (checkcol) {
         ingame = false; // Fin de la partie pour ce niveau
-        return true; // Signale que le niveau est terminé
+        return true; // Signal que le niveau est terminé
     }
     return false; // Sinon, continuer
 }
 
 function mainLoop() {
-    countdownInterval;
-    ctx.clearRect(0,0,w,h);
+    // Réinitialisation du canvas
+    ctx.clearRect(0, 0, w, h);
+
+    // Afficher le niveau actuel
     afficheNiveau(niveau);
-    // Mettre à jour et dessiner les éléments
+
+    // Vérifier le compte à rebours avant de commencer
+    if (countdownValue > 0) {
+        // Affichage uniquement du compte à rebours
+        return; // Ne pas exécuter le reste tant que le compte à rebours n'est pas terminé
+    }
+
+    // Mettre à jour et dessiner les éléments du niveau
     player.updatePlayer();
     player.draw();
     c.draw();
-    initObstacles(niveau);
-    // Dessiner les obstacles => inuile pour le moment
+
+    // Mettre à jour et dessiner les obstacles
     obstacles.forEach(obstacle => {
         obstacle.update();
         obstacle.draw();
     });
-    // Continuer la boucle
-    if (ingame) {
-        checkcol = false; 
-        // Vérifier si on doit passer au niveau suivant
-        if (verifierPassageNiveau()) {
+
+    // Vérifier si le joueur a atteint la sortie
+    checkCollision(player, c);
+
+    if (verifierPassageNiveau()) {
+        // Afficher un message de fin de niveau avant de continuer
+        ctx.save();
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "blue";
+        ctx.textAlign = "center";
+        ctx.fillText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
+        ctx.restore();
+
+        setTimeout(() => {
+            // Passer au niveau suivant
             niveau++;
+
             if (niveau > dernier_niv) {
                 console.log("Félicitations, vous avez terminé le jeu !");
-                return; // Arrêtez la boucle principale
+                ctx.clearRect(0, 0, w, h);
+                ctx.save();
+                ctx.font = "40px Arial";
+                ctx.fillStyle = "green";
+                ctx.textAlign = "center";
+                ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2);
+                ctx.restore();
+                return; // Arrêter le jeu
             }
 
             // Initialiser le niveau suivant
             initialiserNiveau(niveau);
-	    afficheNiveau(niveau);
-        }
+            initObstacles(niveau); // Charger les obstacles pour le niveau suivant
+            ingame = true; // Redémarrer la boucle principale
+            requestAnimationFrame(mainLoop);
+        }, 2000); // Pause de 2 secondes avant le prochain niveau
+
+        return; // Suspendre la boucle principale temporairement
     }
 
-    // Continuer la boucle
-    requestAnimationFrame(mainLoop);
-    
+    // Continuer la boucle principale
+    if (ingame) {
+        requestAnimationFrame(mainLoop);
+    }
 }
-// Lancer le jeu
-initialiserNiveau(niveau);
-mainLoop();
