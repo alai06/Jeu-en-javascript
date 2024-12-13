@@ -11,7 +11,7 @@ var checkcol=false;//variable pour detecter une collision
 
 const countdownElement = document.getElementById("countdown");
 // Définir la valeur initiale
-let countdownValue = 5;
+let countdownValue = 0;
 const countdownInterval = setInterval(updateCountdown, 1000);
 
 //classes-----------------------------------------------------------------
@@ -23,7 +23,7 @@ class Player {
         this.y=y;
         this.size=20;
         this.color=color;
-        this.speed=5;
+        this.speed=3;
         this.score=0;
     }
     draw(){
@@ -65,20 +65,51 @@ class Player {
         
     }
     resetPosition() {
-        this.x = 20;
-        this.y = 20;
+        this.x = 10;
+        this.y = 10;
     }
     
 }
 
 class Obstacle {
-    constructor(x,y,size,move,kill){
+    constructor(x,y,w,h,move,kill, color){
         this.x=x;
         this.y=y;
-        this.size=size;
+        this.w=w;
+        this.h=h;
         this.move=move;//true or false
-        this.color="black";
+        this.color=color;
         this.cankill=kill;//true or false
+    }
+    checkCollision(player) {
+        let halfW = this.w / 2;
+        let halfH = this.h / 2;
+        let playerHalfSize = player.size / 2;
+
+        if (
+            player.x + playerHalfSize > this.x - halfW && // Collision côté droit du joueur
+            player.x - playerHalfSize < this.x + halfW && // Collision côté gauche du joueur
+            player.y + playerHalfSize > this.y - halfH && // Collision bas du joueur
+            player.y - playerHalfSize < this.y + halfH // Collision haut du joueur
+        ) {
+            console.log("Collision avec l'obstacle, blocage du joueur");
+
+            // Bloquer le joueur sans téléportation
+            if (player.x < this.x && keys["ArrowRight"]) {
+                player.x -= player.speed; // Annule le déplacement vers la droite
+            } else if (player.x > this.x && keys["ArrowLeft"]) {
+                player.x += player.speed; // Annule le déplacement vers la gauche
+            }
+
+            if (player.y < this.y && keys["ArrowDown"]) {
+                player.y -= player.speed; // Annule le déplacement vers le bas
+            } else if (player.y > this.y && keys["ArrowUp"]) {
+                player.y += player.speed; // Annule le déplacement vers le haut
+            }
+        }
+    }
+    draw(){
+        drawRect(this.x, this.y, this.w, this.h, this.color);
     }
 }
 
@@ -109,9 +140,20 @@ class ExitGate{
         ctx.stroke();
         ctx.restore();
     }
-    modifyCoordExitGate(exitgate, x, y){
-        exitgate.x=x;
-        exitgate.y=y;
+    modifyCoordExitGate(x, y){
+        this.x=x;
+        this.y=y;
+    }
+    checkCollision(player) { // à modifier
+        if (
+            player.x < this.x + this.size &&
+            player.x + player.size > this.x &&
+            player.y < this.y + this.size &&
+            player.y + player.size > this.y
+        ) {
+            console.log("Collision détectée : Vous avez touché l'objectif !");
+        checkcol=true;
+        }
     }
 }
 
@@ -241,28 +283,18 @@ function initObstacles(niveau) {
 
         case 2:
             // Niveau 2 : obstacles verticaux simples
-            obstacles.push(createMovingObstacle(100, 0, 20, 200, "red", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 150, "blue", "vertical", 0, "rectangle"));
+            obstacles.push(new Obstacle(100,0,10,100,false,false,"red"));
+            obstacles.push(new Obstacle(200,100,100,100,false,false,"green"));
+            c.modifyCoordExitGate(100,600);
             break;
 	case 3:
             // Niveau 3 : obstacles verticaux et quelques obstacles horizontaux
-            obstacles.push(createMovingObstacle(100, 0, 20, 200, "red", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(300, 100, 20, 150, "blue", "vertical", 0, "rectangle"));
-            obstacles.push(createMovingObstacle(400, 300, 100, 20, "green", "horizontal", 0, "rectangle"));
+            obstacles.push(new Obstacle(100,0,20,200,false,false,"red"));
+            obstacles.push(new Obstacle(300,100,20,150,false,false,"blue"));
+            obstacles.push(new Obstacle(400,300,100,20,false,false,"red"));
+            c.modifyCoordExitGate(400,25);
             break;
         
-    }
-}
-
-function checkCollision(player, exitgate) { // à modifier
-    if (
-        player.x < exitgate.x + exitgate.size &&
-        player.x + player.size > exitgate.x &&
-        player.y < exitgate.y + exitgate.size &&
-        player.y + player.size > exitgate.y
-    ) {
-        console.log("Collision détectée : Vous avez touché l'objectif !");
-	checkcol=true;
     }
 }
 
@@ -316,15 +348,17 @@ function mainLoop() {
     player.updatePlayer();
     player.draw();
     c.draw();
-
+    console.log(player.x, player.y);
     // Mettre à jour et dessiner les obstacles
     obstacles.forEach(obstacle => {
-        obstacle.update();
         obstacle.draw();
+        obstacle.checkCollision(player);
+        
+        
     });
 
     // Vérifier si le joueur a atteint la sortie
-    checkCollision(player, c);
+    c.checkCollision(player);
 
     if (verifierPassageNiveau()) {
         // Afficher un message de fin de niveau avant de continuer
