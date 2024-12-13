@@ -3,8 +3,8 @@ var obstacles = [];
 var player; // Le joueur
 var keys = {}; // Suivi des touches pressées
 var win = 0; // Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=1;
-var dernier_niv=9;
+var niveau=3;
+var dernier_niv=20;
 var c;
 var ingame;
 var checkcol=false;//variable pour detecter une collision
@@ -13,6 +13,9 @@ const countdownElement = document.getElementById("countdown");
 // Définir la valeur initiale
 let countdownValue = 0;
 const countdownInterval = setInterval(updateCountdown, 1000);
+
+
+//div hidden html
 
 //classes-----------------------------------------------------------------
 class Player {
@@ -72,44 +75,87 @@ class Player {
 }
 
 class Obstacle {
-    constructor(x,y,w,h,move,kill, color){
+    constructor(x,y,w,h,move,XouY, color){
         this.x=x;
         this.y=y;
         this.w=w;
         this.h=h;
         this.move=move;//true or false
         this.color=color;
-        this.cankill=kill;//true or false
+        this.XouY=XouY;
+        this.speedX=0;
+        this.speedY=0;
+        if(this.XouY[0]==="X"){
+            this.speedX=this.XouY[1];
+        }
+        if(this.XouY[0]==="Y"){
+            this.speedY=this.XouY[1];
+        }     
     }
     checkCollision(player) {
         let halfW = this.w / 2;
         let halfH = this.h / 2;
         let playerHalfSize = player.size / 2;
+        if(!this.move){
+            if (
+                player.x + playerHalfSize > this.x - halfW && //Collision côté droit du joueur
+                player.x - playerHalfSize < this.x + halfW && //Collision côté gauche du joueur
+                player.y + playerHalfSize > this.y - halfH && //Collision bas du joueur
+                player.y - playerHalfSize < this.y + halfH //Collision haut du joueur
+            ) {
+                if (player.x < this.x && keys["ArrowRight"]) {
+                    player.x -= player.speed; //annule déplacement vers la droite
+                } else if (player.x > this.x && keys["ArrowLeft"]) {
+                    player.x += player.speed; //annule déplacement vers la gauche
+                }
 
-        if (
-            player.x + playerHalfSize > this.x - halfW && // Collision côté droit du joueur
-            player.x - playerHalfSize < this.x + halfW && // Collision côté gauche du joueur
-            player.y + playerHalfSize > this.y - halfH && // Collision bas du joueur
-            player.y - playerHalfSize < this.y + halfH // Collision haut du joueur
-        ) {
-            console.log("Collision avec l'obstacle, blocage du joueur");
-
-            // Bloquer le joueur sans téléportation
-            if (player.x < this.x && keys["ArrowRight"]) {
-                player.x -= player.speed; // Annule le déplacement vers la droite
-            } else if (player.x > this.x && keys["ArrowLeft"]) {
-                player.x += player.speed; // Annule le déplacement vers la gauche
+                if (player.y < this.y && keys["ArrowDown"]) {
+                    player.y -= player.speed; //annule déplacement vers le bas
+                } else if (player.y > this.y && keys["ArrowUp"]) {
+                    player.y += player.speed; //annule déplacement vers le haut
+                }
             }
+        }
+        else{
+            if (
+                player.x + playerHalfSize > this.x - halfW && //Collision côté droit du joueur
+                player.x - playerHalfSize < this.x + halfW && //Collision côté gauche du joueur
+                player.y + playerHalfSize > this.y - halfH && //Collision bas du joueur
+                player.y - playerHalfSize < this.y + halfH //Collision haut du joueur
+            ) {
+                if (player.x < this.x && keys["ArrowRight"]) {
+                    player.x -= player.speed; //annule déplacement vers la droite
+                } else if (player.x > this.x && keys["ArrowLeft"]) {
+                    player.x += player.speed; //annule déplacement vers la gauche
+                }
 
-            if (player.y < this.y && keys["ArrowDown"]) {
-                player.y -= player.speed; // Annule le déplacement vers le bas
-            } else if (player.y > this.y && keys["ArrowUp"]) {
-                player.y += player.speed; // Annule le déplacement vers le haut
+                if (player.y < this.y && keys["ArrowDown"]) {
+                    player.y -= player.speed; //annule déplacement vers le bas
+                } else if (player.y > this.y && keys["ArrowUp"]) {
+                    player.y += player.speed; //annule déplacement vers le haut
+                }
+                player.x += this.speedX;
+                player.y += this.speedY;
             }
         }
     }
     draw(){
         drawRect(this.x, this.y, this.w, this.h, this.color);
+    }
+    moving() {
+        if (this.move) {
+            this.x +=this.speedX;
+            this.y += this.speedY;
+
+            // Rebond sur les bords de l'écran
+            if (this.x + this.w / 2 > w || this.x - this.w / 2 < 0) {
+                this.speedX = -this.speedX; // Inverser la direction en X
+            }
+
+            if (this.y + this.h / 2 > h || this.y - this.h / 2 < 0) {
+                this.speedY = -this.speedY; // Inverser la direction en Y si tu veux du mouvement vertical
+            }
+        }
     }
 }
 
@@ -151,7 +197,7 @@ class ExitGate{
             player.y < this.y + this.size &&
             player.y + player.size > this.y
         ) {
-            console.log("Collision détectée : Vous avez touché l'objectif !");
+            //console.log("Collision détectée : Vous avez touché l'objectif !");
         checkcol=true;
         }
     }
@@ -175,10 +221,8 @@ window.onload = function init() {
     h = canvas.height;  
     ctx = canvas.getContext('2d');
 
-    c = new ExitGate(650,600,25);
     player = new Player(1,"Toto",10,10,"red");
-
-    // Gérer les événements clavier
+    c = new ExitGate(w/2,h/2,25);
     window.addEventListener("keydown", function(e) {
         keys[e.key] = true;
     });
@@ -233,70 +277,178 @@ function exitgame(){
     cancelAnimationFrame(mainLoop);//inutile
 }
 
-function createMovingObstacle(x, y, width, height, c, direction, speed, type) {
-    // Créer l'obstacle et le retourner
-    const obst = {
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        color: c,
-        direction: direction,
-        speed: speed,
-        type: type,
-
-        // Mise à jour de la position
-        update: function () {
-            if (this.direction === "vertical") {
-                this.y += this.speed;
-
-                // Collision avec les bords supérieur et inférieur
-                if (this.y <= 0 || this.y + this.height >= h) {
-                    this.speed = -this.speed; // Inverser la direction
-                }
-            } else if (this.direction === "horizontal") {
-                this.x += this.speed;
-
-                // Collision avec les bords gauche et droit
-                if (this.x <= 0 || this.x + this.width >= w) {
-                    this.speed = -this.speed; // Inverser la direction
-                }
-            }
-        },
-
-        // Dessiner l'obstacle
-        draw: function () {
-            drawRect(this.x, this.y, this.width, this.height, this.color);
-        }
-    };
-
-    return obst;
-}
-
 function initObstacles(niveau) {
-    obstacles = []; // Réinitialiser la liste des obstacles
-
+    obstacles = []; // Réinitialiser les obstacles à chaque niveau
     switch (niveau) {
         case 1:
-            // Niveau 1 : pas d'obstacles
+            
+            break;
+        case 2:
+            // Niveau 2 : Deux obstacles simples
+            obstacles.push(new Obstacle(150, 0, 10, 1000, false, false, "red"));
+            obstacles.push(new Obstacle(500, 600, 10, 1000, false, false, "green"));
+            c.modifyCoordExitGate(600, 600);
             break;
 
-        case 2:
-            // Niveau 2 : obstacles verticaux simples
-            obstacles.push(new Obstacle(100,0,10,100,false,false,"red"));
-            obstacles.push(new Obstacle(200,100,100,100,false,false,"green"));
-            c.modifyCoordExitGate(100,600);
+        case 3:
+            // Niveau 3 : Trois obstacles fixes
+            obstacles.push(new Obstacle(250, 0, 50, 400, false, false, "red"));
+            obstacles.push(new Obstacle(500, 0, 50, 400, false, false, "blue"));
+            obstacles.push(new Obstacle(0, 300, 600, 20, false, false, "red"));
+            obstacles.push(new Obstacle(700, 300, 500, 20, false, false, "red"));
+            c.modifyCoordExitGate(w/2, 600);
             break;
-	case 3:
-            // Niveau 3 : obstacles verticaux et quelques obstacles horizontaux
-            obstacles.push(new Obstacle(100,0,20,200,false,false,"red"));
-            obstacles.push(new Obstacle(300,100,20,150,false,false,"blue"));
-            obstacles.push(new Obstacle(400,300,100,20,false,false,"red"));
-            c.modifyCoordExitGate(400,25);
+
+        case 4:
+            // Niveau 4 : Obstacles plus larges et différents
+            obstacles.push(new Obstacle(150, 50, 50, 150, true, ["X",1], "purple"));
+            /*obstacles.push(new Obstacle(400, 200, 150, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(600, 100, 30, 200, false, false, "blue"));
+            c.modifyCoordExitGate(500, 500);*/
             break;
-        
+
+        case 5:
+            // Niveau 5 : Quatre obstacles
+            obstacles.push(new Obstacle(100, 100, 50, 150, false, false, "orange"));
+            obstacles.push(new Obstacle(300, 200, 100, 50, true, ["X",1], "red"));
+            obstacles.push(new Obstacle(450, 350, 50, 100, true, ["Y",1], "green"));
+            obstacles.push(new Obstacle(600, 400, 100, 50, false, false, "blue"));
+            c.modifyCoordExitGate(650, 50);
+            break;
+
+        case 6:
+            // Niveau 6 : Plus d'obstacles fixes, disposition plus complexe
+            obstacles.push(new Obstacle(100, 150, 50, 100, false, false, "purple"));
+            obstacles.push(new Obstacle(200, 300, 100, 50, false, false, "green"));
+            obstacles.push(new Obstacle(400, 100, 150, 50, false, false, "red"));
+            obstacles.push(new Obstacle(550, 400, 50, 150, false, false, "yellow"));
+            c.modifyCoordExitGate(50, 600);
+            break;
+
+        case 7:
+            // Niveau 7 : Obstacles avec plus de variétés
+            obstacles.push(new Obstacle(150, 0, 50, 200, false, false, "red"));
+            obstacles.push(new Obstacle(350, 150, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(550, 300, 50, 100, false, false, "green"));
+            obstacles.push(new Obstacle(300, 400, 150, 50, false, false, "purple"));
+            obstacles.push(new Obstacle(100, 450, 50, 100, false, false, "orange"));
+            c.modifyCoordExitGate(600, 50);
+            break;
+
+        case 8:
+            // Niveau 8 : Obstacles plus nombreux
+            obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "green"));
+            obstacles.push(new Obstacle(300, 400, 200, 20, false, false, "blue"));
+            obstacles.push(new Obstacle(500, 100, 20, 400, false, false, "red"));
+            obstacles.push(new Obstacle(600, 300, 50, 150, false, false, "yellow"));
+            c.modifyCoordExitGate(100, 50);
+            break;
+
+        case 9:
+            // Niveau 9 : Obstacles avec plus de complexité
+            obstacles.push(new Obstacle(150, 100, 50, 200, false, false, "purple"));
+            obstacles.push(new Obstacle(300, 200, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(450, 100, 50, 200, false, false, "green"));
+            obstacles.push(new Obstacle(600, 250, 150, 50, false, false, "red"));
+            c.modifyCoordExitGate(50, 500);
+            break;
+
+        case 10:
+            // Niveau 10 : Obstacles larges et étroits
+            obstacles.push(new Obstacle(100, 150, 300, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(400, 100, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(200, 350, 50, 150, false, false, "purple"));
+            c.modifyCoordExitGate(600, 50);
+            break;
+
+        case 11:
+            // Niveau 11 : Obstacle complexe au centre
+            obstacles.push(new Obstacle(300, 300, 200, 200, false, false, "green"));
+            obstacles.push(new Obstacle(100, 100, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(500, 50, 100, 50, false, false, "red"));
+            c.modifyCoordExitGate(50, 600);
+            break;
+
+        case 12:
+            // Niveau 12 : Mélange de petits et grands obstacles
+            obstacles.push(new Obstacle(100, 100, 100, 100, false, false, "orange"));
+            obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "red"));
+            obstacles.push(new Obstacle(500, 350, 100, 200, false, false, "green"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        case 13:
+            // Niveau 13 : Obstacles en forme de couloirs
+            obstacles.push(new Obstacle(100, 100, 400, 20, false, false, "purple"));
+            obstacles.push(new Obstacle(200, 300, 300, 20, false, false, "blue"));
+            obstacles.push(new Obstacle(400, 400, 20, 150, false, false, "yellow"));
+            c.modifyCoordExitGate(600, 50);
+            break;
+
+        case 14:
+            // Niveau 14 : Obstacles en couloirs plus complexes
+            obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "green"));
+            obstacles.push(new Obstacle(300, 200, 300, 20, false, false, "red"));
+            obstacles.push(new Obstacle(500, 400, 20, 150, false, false, "yellow"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        case 15:
+            // Niveau 15 : Obstacles plus serrés
+            obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "blue"));
+            obstacles.push(new Obstacle(300, 100, 50, 200, false, false, "purple"));
+            obstacles.push(new Obstacle(500, 300, 100, 100, false, false, "red"));
+            c.modifyCoordExitGate(50, 600);
+            break;
+
+        case 16:
+            // Niveau 16 : Grand obstacle au centre
+            obstacles.push(new Obstacle(300, 300, 200, 200, false, false, "orange"));
+            obstacles.push(new Obstacle(100, 50, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(500, 50, 100, 50, false, false, "green"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        case 17:
+            // Niveau 17 : Obstacles plus variés
+            obstacles.push(new Obstacle(100, 100, 50, 100, false, false, "purple"));
+            obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(500, 300, 50, 100, false, false, "red"));
+            obstacles.push(new Obstacle(650, 400, 50, 100, false, false, "green"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        case 18:
+            // Niveau 18 : Obstacles plus nombreux
+            obstacles.push(new Obstacle(100, 150, 200, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(300, 300, 100, 50, false, false, "green"));
+            obstacles.push(new Obstacle(500, 100, 100, 200, false, false, "red"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        case 19:
+            // Niveau 19 : Beaucoup d'obstacles étroits
+            obstacles.push(new Obstacle(100, 100, 50, 300, false, false, "yellow"));
+            obstacles.push(new Obstacle(300, 200, 50, 100, false, false, "red"));
+            obstacles.push(new Obstacle(500, 100, 50, 200, false, false, "green"));
+            c.modifyCoordExitGate(50, 600);
+            break;
+
+        case 20:
+            // Niveau 20 : Final avec obstacles nombreux et serrés
+            obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "red"));
+            obstacles.push(new Obstacle(300, 200, 50, 200, false, false, "blue"));
+            obstacles.push(new Obstacle(450, 300, 50, 100, false, false, "green"));
+            obstacles.push(new Obstacle(600, 400, 50, 150, false, false, "yellow"));
+            c.modifyCoordExitGate(50, 50);
+            break;
+
+        default:
+            console.log("Niveau non défini");
+            break;
     }
 }
+
 
 function afficheNiveau(niveau) {
     ctx.save();
@@ -306,7 +458,6 @@ function afficheNiveau(niveau) {
     ctx.restore();
 }
 
-// Fonction pour mettre à jour le compteur
 function updateCountdown() {
     if (countdownValue > 0) {
         countdownValue--;
@@ -332,36 +483,24 @@ function verifierPassageNiveau() {
 }
 
 function mainLoop() {
-    // Réinitialisation du canvas
     ctx.clearRect(0, 0, w, h);
-
-    // Afficher le niveau actuel
     afficheNiveau(niveau);
-
-    // Vérifier le compte à rebours avant de commencer
     if (countdownValue > 0) {
-        // Affichage uniquement du compte à rebours
-        return; // Ne pas exécuter le reste tant que le compte à rebours n'est pas terminé
+        return;
     }
 
-    // Mettre à jour et dessiner les éléments du niveau
     player.updatePlayer();
     player.draw();
     c.draw();
-    console.log(player.x, player.y);
-    // Mettre à jour et dessiner les obstacles
-    obstacles.forEach(obstacle => {
-        obstacle.draw();
-        obstacle.checkCollision(player);
-        
-        
-    });
 
-    // Vérifier si le joueur a atteint la sortie
+    obstacles.forEach(obstacle => {
+        obstacle.moving();
+        obstacle.draw();
+        obstacle.checkCollision(player); 
+    });
     c.checkCollision(player);
 
     if (verifierPassageNiveau()) {
-        // Afficher un message de fin de niveau avant de continuer
         ctx.save();
         ctx.font = "30px Arial";
         ctx.fillStyle = "blue";
@@ -394,8 +533,8 @@ function mainLoop() {
 
         return; // Suspendre la boucle principale temporairement
     }
-
-    // Continuer la boucle principale
+    //var niveau=4;
+    //initObstacles(niveau);
     if (ingame) {
         requestAnimationFrame(mainLoop);
     }
