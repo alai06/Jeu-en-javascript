@@ -3,7 +3,7 @@ var obstacles = [];
 var players=[];
 var keys = {}; //Suivi des touches pressées
 var win = 0; //Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=7;
+var niveau=1;
 var dernier_niv=20;
 var c;
 var ingame;
