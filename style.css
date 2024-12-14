@@ -116,3 +116,24 @@ body {
 .niveau-container p.niveau-bas {
   color: #ff3300;
 }
+/* Ajout pour styliser le menu des joueurs */
+.menu-container {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 255, 204, 0.5);
+  color: #fff;
+}
+
+form label, form select, form input {
+  display: block;
+  margin: 10px 0;
+}
+
+form input[type="color"] {
+  width: 50px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+}

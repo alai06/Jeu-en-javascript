@@ -1,8 +1,8 @@
 var canvas, ctx, w, h;
 var obstacles = [];
-var player; // Le joueur
-var keys = {}; // Suivi des touches pressées
-var win = 0; // Variable de victoire (0 = pas de victoire, 1 = victoire)
+var players=[];
+var keys = {}; //Suivi des touches pressées
+var win = 0; //Variable de victoire (0 = pas de victoire, 1 = victoire)
 var niveau=1;
 var dernier_niv=20;
 var c;
@@ -13,9 +13,12 @@ const countdownElement = document.getElementById("countdown");
 // Définir la valeur initiale
 let countdownValue = 0;
 const countdownInterval = setInterval(updateCountdown, 1000);
-
-
-//div hidden html
+let controls = [
+    { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" },
+    { up: "z", down: "s", left: "q", right: "d" },
+    { up: "t", down: "g", left: "f", right: "h" },
+    { up: "i", down: "k", left: "j", right: "l" }
+];
 
 //classes-----------------------------------------------------------------
 class Player {
@@ -28,6 +31,7 @@ class Player {
         this.color=color;
         this.speed=3;
         this.score=0;
+        this.control=controls[this.id-1];
     }
     draw(){
         drawRect(this.x, this.y, this.size, this.size, this.color);
@@ -36,32 +40,32 @@ class Player {
     updatePlayer() { //gere qu'un perso
         let diagonalSpeed = this.speed / Math.sqrt(2);
         //si horizontal et vertical en même temps
-        if ((keys["ArrowRight"] || keys["ArrowLeft"]) && (keys["ArrowDown"] || keys["ArrowUp"])) {
-            if (keys["ArrowRight"] && this.x + this.size < w) {
+        if ((keys[this.control.right] || keys[this.control.left]) && (keys[this.control.down] || keys[this.control.up])) {
+            if (keys[this.control.right] && this.x + this.size < w) {
                 this.x += diagonalSpeed;
             }
-            if (keys["ArrowLeft"] && this.x -this.size/2> 10) {
+            if (keys[this.control.left] && this.x -this.size/2> 10) {
                 
                 this.x -= diagonalSpeed;
             }
-            if (keys["ArrowDown"] && this.y + this.size/2 < h) {
+            if (keys[this.control.down] && this.y + this.size/2 < h) {
                 this.y += diagonalSpeed;
             }
-            if (keys["ArrowUp"] && this.y -this.size/2> 0) {
+            if (keys[this.control.up] && this.y -this.size/2> 0) {
                 this.y -= diagonalSpeed;
             }
         }
         else {
-            if (keys["ArrowRight"] && this.x + this.size/2 < w) {
+            if (keys[this.control.right] && this.x + this.size/2 < w) {
                 this.x += this.speed;
             }
-            if (keys["ArrowLeft"] && this.x -this.size/2> 0) {
+            if (keys[this.control.left] && this.x -this.size/2> 0) {
                 this.x -= this.speed;
             }
-            if (keys["ArrowDown"] && this.y + this.size/2 < h) {
+            if (keys[this.control.down] && this.y + this.size/2 < h) {
                 this.y += this.speed;
             }
-            if (keys["ArrowUp"] && this.y -this.size/2> 0) {
+            if (keys[this.control.up] && this.y -this.size/2> 0) {
                 this.y -= this.speed;
             }
         }
@@ -221,17 +225,6 @@ class ExitGate{
     }
 }
 
-class Level{
-    constructor(i,d,eg,listO){
-        this.id=i;
-        this.difficulty=d;//1, 2 and 3
-        this.exitgate=eg;
-        this.obstacles=listO;
-    }
-    afficheLevel(){//on met tout les objets qu'on veut avoir et on changera avec les indices.
-
-    }
-}
 //------------------------------------------------------------------------
 window.onload = function init() {
     canvas = document.querySelector("#myCanvas");
@@ -239,8 +232,8 @@ window.onload = function init() {
     h = canvas.height;  
     ctx = canvas.getContext('2d');
 
-    player = new Player(1,"Toto",10,10,"red");
-    c = new ExitGate(w/2,h/2,25);
+    //player = new Player(1,"Toto",10,10,"red");
+    
     window.addEventListener("keydown", function(e) {
         keys[e.key] = true;
     });
@@ -249,8 +242,76 @@ window.onload = function init() {
     });
     
     ingame=false;
-    Menu();
+    //Menu();
 };
+
+document.addEventListener('DOMContentLoaded', function () {
+    const menu = document.getElementById('menu');
+    const game = document.getElementById('game');
+    const playersSelect = document.getElementById('players');
+    const playerColorsDiv = document.getElementById('playerColors');
+    const startGameButton = document.getElementById('startGame');
+    
+    // Fonction pour générer les options de couleur pour chaque joueur
+    function generatePlayerColorOptions(numPlayers) {
+        playerColorsDiv.innerHTML = ''; // On efface les anciennes options
+        const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
+        for (let i = 1; i <= numPlayers; i++) {
+            const label = document.createElement('label');
+            label.innerText = `Couleur du Joueur ${i}: `;
+            
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.id = `colorPlayer${i}`;
+            input.name = `colorPlayer${i}`;
+            input.value = predefinedColors[i - 1]; // Attribuer la couleur définie
+            
+            playerColorsDiv.appendChild(label);
+            playerColorsDiv.appendChild(input);
+            playerColorsDiv.appendChild(document.createElement('br'));
+        }
+    }
+
+    // Événement lorsque le nombre de joueurs est changé
+    playersSelect.addEventListener('change', function () {
+        generatePlayerColorOptions(playersSelect.value);
+    });
+
+    // Initialiser avec 1 joueur par défaut
+    generatePlayerColorOptions(playersSelect.value);
+
+    // Quand le bouton 'Commencer le jeu' est cliqué
+    startGameButton.addEventListener('click', function () {
+        // Récupérer les informations des joueurs
+        const numPlayers = playersSelect.value;
+        const playerColors = [];
+        for (let i = 1; i <= numPlayers; i++) {
+            const colorInput = document.getElementById(`colorPlayer${i}`);
+            playerColors.push(colorInput.value);
+        }
+
+        // Cacher le menu et afficher le jeu
+        menu.style.display = 'none';
+        game.style.display = 'block';
+        
+        // Vous pouvez ensuite utiliser ces informations dans votre jeu
+        initGame(numPlayers, playerColors);
+    });
+
+    // Fonction pour initialiser le jeu avec les informations des joueurs
+    function initGame(numPlayers, playerColors) {
+        // Initialiser les joueurs avec le nombre et la couleur sélectionnés
+        // Exemple:
+        //players = [];
+        for (let i = 0; i < numPlayers; i++) {
+            players.push(new Player(i + 1, `Joueur ${i + 1}`, 30, 30 + i * 40, playerColors[i]));
+        }
+        
+        // Appel de la boucle de jeu
+        c = new ExitGate(w/2,h/2,25);
+        mainLoop();
+    }
+});
 
 function drawRect(x, y, width, height, c) {
     ctx.save();
@@ -487,14 +548,14 @@ function updateCountdown() {
     }
 }
 function initialiserNiveau(niv) {
-    player.resetPosition();
-    ingame = true;
+    players.forEach(player => {
+        player.resetPosition();
+    });
     checkcol = false;
 }
 
 function verifierPassageNiveau() {
     if (checkcol) {
-        ingame = false; // Fin de la partie pour ce niveau
         return true; // Signal que le niveau est terminé
     }
     return false; // Sinon, continuer
@@ -507,16 +568,19 @@ function mainLoop() {
         return;
     }
 
-    player.updatePlayer();
-    player.draw();
     c.draw();
+    players.forEach(player => {
+        player.updatePlayer();
+        player.draw();
+        c.checkCollision(player);
+    });
 
     obstacles.forEach(obstacle => {
         obstacle.moving();
         obstacle.draw();
-        obstacle.checkCollision(player); 
+        players.forEach(player => obstacle.checkCollision(player));
     });
-    c.checkCollision(player);
+    
 
     if (verifierPassageNiveau()) {
         ctx.save();
@@ -545,7 +609,6 @@ function mainLoop() {
             // Initialiser le niveau suivant
             initialiserNiveau(niveau);
             initObstacles(niveau); // Charger les obstacles pour le niveau suivant
-            ingame = true; // Redémarrer la boucle principale
             requestAnimationFrame(mainLoop);
         }, 2000); // Pause de 2 secondes avant le prochain niveau
 
@@ -553,7 +616,6 @@ function mainLoop() {
     }
     //var niveau=4;
     //initObstacles(niveau);
-    if (ingame) {
-        requestAnimationFrame(mainLoop);
-    }
+    requestAnimationFrame(mainLoop);
+    
 }
