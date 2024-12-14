@@ -8,16 +8,16 @@ var dernier_niv=20;
 var c;
 var ingame;
 var checkcol=false;//variable pour detecter une collision
+var count=0;
 
 const countdownElement = document.getElementById("countdown");
-// Définir la valeur initiale
 let countdownValue = 0;
 const countdownInterval = setInterval(updateCountdown, 1000);
 let controls = [
-    { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" },
-    { up: "z", down: "s", left: "q", right: "d" },
-    { up: "t", down: "g", left: "f", right: "h" },
-    { up: "i", down: "k", left: "j", right: "l" }
+    { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" },//J1
+    { up: "z", down: "s", left: "q", right: "d" },//J2
+    { up: "t", down: "g", left: "f", right: "h" },//J3
+    { up: "i", down: "k", left: "j", right: "l" }//J4
 ];
 
 //classes-----------------------------------------------------------------
@@ -29,15 +29,18 @@ class Player {
         this.y=y;
         this.size=20;
         this.color=color;
-        this.speed=10;
+        this.speed=3;
         this.score=0;
         this.control=controls[this.id-1];
+        this.exit=false;
     }
     draw(){
-        drawRect(this.x, this.y, this.size, this.size, this.color);
+        if(!this.exit){
+        drawRect(this.x, this.y, this.size, this.size, this.color);}
     }
 
-    updatePlayer() { //gere qu'un perso
+    updatePlayer() {
+        if(this.exit){return;}
         let diagonalSpeed = this.speed / Math.sqrt(2);
         //si horizontal et vertical en même temps
         if ((keys[this.control.right] || keys[this.control.left]) && (keys[this.control.down] || keys[this.control.up])) {
@@ -175,6 +178,9 @@ class Score{
         this.third=t;
         this.last=l;
     }
+    addingScore(){
+        
+    }
 }
 
 class ExitGate{
@@ -183,6 +189,7 @@ class ExitGate{
         this.y=y;
         this.size=size;
         this.color="white";
+        this.players=new Set();
     }
     draw(){
         ctx.save();
@@ -199,17 +206,25 @@ class ExitGate{
         this.x=x;
         this.y=y;
     }
-    checkCollision(player) { // à modifier
+    checkCollision(player) {
         if (
             player.x < this.x + this.size &&
             player.x + player.size > this.x &&
             player.y < this.y + this.size &&
-            player.y + player.size > this.y
+            player.y + player.size > this.y &&
+            !player.exit
         ) {
-            //console.log("Collision détectée : Vous avez touché l'objectif !");
-        checkcol=true;
-        niveau++;
+            player.exit=true;
+            this.players.add(player.id);
+            if (this.players.size === players.length) {
+                checkcol = true;
+            }
+
+
         }
+    }
+    resetForNextLevel() {
+        this.playersReached.clear();
     }
     moving(XouY){
         if(XouY==="X"){
@@ -227,8 +242,6 @@ window.onload = function init() {
     w = canvas.width; 
     h = canvas.height;  
     ctx = canvas.getContext('2d');
-
-    //player = new Player(1,"Toto",10,10,"red");
     
     window.addEventListener("keydown", function(e) {
         keys[e.key] = true;
@@ -236,9 +249,6 @@ window.onload = function init() {
     window.addEventListener("keyup", function(e) {
         keys[e.key] = false;
     });
-    
-    ingame=false;
-    //Menu();
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -248,9 +258,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const playerColorsDiv = document.getElementById('playerColors');
     const startGameButton = document.getElementById('startGame');
     
-    // Fonction pour générer les options de couleur pour chaque joueur
+    //Fonction pour générer les couleurs pour chaque joueur
     function generatePlayerColorOptions(numPlayers) {
-        playerColorsDiv.innerHTML = ''; // On efface les anciennes options
+        playerColorsDiv.innerHTML = ''; //On efface les anciennes options
         const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
         for (let i = 1; i <= numPlayers; i++) {
             const label = document.createElement('label');
@@ -260,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = 'color';
             input.id = `colorPlayer${i}`;
             input.name = `colorPlayer${i}`;
-            input.value = predefinedColors[i - 1]; // Attribuer la couleur définie
+            input.value = predefinedColors[i - 1];//Attribuer la couleur définie
             
             playerColorsDiv.appendChild(label);
             playerColorsDiv.appendChild(input);
@@ -268,17 +278,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Événement lorsque le nombre de joueurs est changé
+    //Événement lorsque le nombre de joueurs est changé
     playersSelect.addEventListener('change', function () {
         generatePlayerColorOptions(playersSelect.value);
     });
 
-    // Initialiser avec 1 joueur par défaut
+    //Initialiser avec 1 joueur par défaut
     generatePlayerColorOptions(playersSelect.value);
 
-    // Quand le bouton 'Commencer le jeu' est cliqué
+    //Quand le bouton 'Commencer le jeu' est cliqué
     startGameButton.addEventListener('click', function () {
-        // Récupérer les informations des joueurs
+        //Récupérer les informations des joueurs
         const numPlayers = playersSelect.value;
         const playerColors = [];
         for (let i = 1; i <= numPlayers; i++) {
@@ -286,24 +296,19 @@ document.addEventListener('DOMContentLoaded', function () {
             playerColors.push(colorInput.value);
         }
 
-        // Cacher le menu et afficher le jeu
+        //Cacher le menu et afficher le jeu
         menu.style.display = 'none';
         game.style.display = 'block';
         
-        // Vous pouvez ensuite utiliser ces informations dans votre jeu
         initGame(numPlayers, playerColors);
     });
 
-    // Fonction pour initialiser le jeu avec les informations des joueurs
+    //Fonction pour initialiser le jeu avec les info des joueurs
     function initGame(numPlayers, playerColors) {
-        // Initialiser les joueurs avec le nombre et la couleur sélectionnés
-        // Exemple:
-        //players = [];
         for (let i = 0; i < numPlayers; i++) {
-            players.push(new Player(i + 1, `Joueur ${i + 1}`, 30, 30 + i * 40, playerColors[i]));
+            players.push(new Player(i + 1, `Joueur ${i + 1}`, 30+ i * 30, 30 , playerColors[i]));
         }
         
-        // Appel de la boucle de jeu
         c = new ExitGate(w/2,h/2,25);
         mainLoop();
     }
@@ -316,7 +321,7 @@ function drawRect(x, y, width, height, c) {
     ctx.restore();
 }
 
-function Menu(){
+function Menu(){//inutile
     ctx.clearRect(0, 0, w, h);
     ctx.save();
     ctx.font = "40px Arial";
@@ -341,7 +346,7 @@ function Menu(){
     });
 }
 
-function exitgame(){
+function exitgame(){//inutile
     ctx.clearRect(0, 0, w, h);
     ctx.save();
     ctx.font = "40px Arial";
@@ -524,7 +529,6 @@ function initObstacles(niveau) {
     }
 }
 
-
 function afficheNiveau(niveau) {
     ctx.save();
     ctx.font = "20px Arial";
@@ -543,18 +547,12 @@ function updateCountdown() {
         countdownElement.textContent = "GO!"; // Afficher "GO!" ou autre
     }
 }
-function initialiserNiveau(niv) {
+function initialiserNiveau(niveau) {//modifier
     players.forEach(player => {
         player.resetPosition();
+        player.exit=false;
     });
     checkcol = false;
-}
-
-function verifierPassageNiveau() {
-    if (checkcol) {
-        return true; // Signal que le niveau est terminé
-    }
-    return false; // Sinon, continuer
 }
 
 function mainLoop() {
@@ -578,7 +576,7 @@ function mainLoop() {
     });
     
 
-    if (verifierPassageNiveau()) {
+    if (checkcol) {
         ctx.save();
         ctx.font = "30px Arial";
         ctx.fillStyle = "blue";
@@ -588,7 +586,7 @@ function mainLoop() {
 
         setTimeout(() => {
             // Passer au niveau suivant
-
+            niveau++;
             if (niveau > dernier_niv) {
                 console.log("Félicitations, vous avez terminé le jeu !");
                 ctx.clearRect(0, 0, w, h);
@@ -602,15 +600,13 @@ function mainLoop() {
             }
 
             // Initialiser le niveau suivant
+            
             initialiserNiveau(niveau);
             initObstacles(niveau); // Charger les obstacles pour le niveau suivant
+            c.resetForNextLevel();
             requestAnimationFrame(mainLoop);
         }, 2000); // Pause de 2 secondes avant le prochain niveau
-
         return; // Suspendre la boucle principale temporairement
     }
-    //var niveau=4;
-    //initObstacles(niveau);
     requestAnimationFrame(mainLoop);
-    
 }

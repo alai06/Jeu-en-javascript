@@ -116,7 +116,7 @@ body {
 .niveau-container p.niveau-bas {
   color: #ff3300;
 }
-/* Ajout pour styliser le menu des joueurs */
+/* menu choix des joueurs */
 .menu-container {
   background: rgba(0, 0, 0, 0.8);
   padding: 30px;

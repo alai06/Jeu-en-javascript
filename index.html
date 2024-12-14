@@ -10,7 +10,6 @@
 
 <script src="Jeu.js"></script>
 
-<!-- Menu de configuration des joueurs -->
 <div id="menu" class="menu-container">
     <h2>Choisissez le nombre de joueurs et leurs couleurs</h2>
     <form id="playerForm">
@@ -22,15 +21,12 @@
             <option value="4">4 Joueurs</option>
         </select>
         
-        <div id="playerColors">
-            <!-- Les options de couleur des joueurs seront insérées ici -->
-        </div>
+        <div id="playerColors"></div>
 
         <button type="button" id="startGame">Commencer le jeu</button>
     </form>
 </div>
 
-<!-- Section du jeu (initialement cachée) -->
 <div id="game" class="game-container" style="display:none;">
     <div class="counter-display">
         <h1 id="countdown"></h1>
