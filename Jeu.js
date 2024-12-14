@@ -9,7 +9,7 @@ var c;
 var ingame;
 var checkcol=false;//variable pour detecter une collision
 var count=0;
-const niveauDisplay = document.getElementById("niveauDisplay");
+
 const countdownElement = document.getElementById("countdown");
 let countdownValue = 0;
 const countdownInterval = setInterval(updateCountdown, 1000);
@@ -43,34 +43,35 @@ class Player {
 
     updatePlayer() {
         if(this.exit){return;}
+        let halfSize = this.size / 2;
         let diagonalSpeed = this.speed / Math.sqrt(2);
         //si horizontal et vertical en même temps
         if ((keys[this.control.right] || keys[this.control.left]) && (keys[this.control.down] || keys[this.control.up])) {
             if (keys[this.control.right] && this.x + this.size < w) {
                 this.x += diagonalSpeed;
             }
-            if (keys[this.control.left] && this.x -this.size/2> 10) {
+            if (keys[this.control.left] && this.x -halfSize> halfSize) {
                 
                 this.x -= diagonalSpeed;
             }
-            if (keys[this.control.down] && this.y + this.size/2 < h) {
+            if (keys[this.control.down] && this.y + halfSize < h) {
                 this.y += diagonalSpeed;
             }
-            if (keys[this.control.up] && this.y -this.size/2> 0) {
+            if (keys[this.control.up] && this.y -halfSize> halfSize) {
                 this.y -= diagonalSpeed;
             }
         }
         else {
-            if (keys[this.control.right] && this.x + this.size/2 < w) {
+            if (keys[this.control.right] && this.x + halfSize < w) {
                 this.x += this.speed;
             }
-            if (keys[this.control.left] && this.x -this.size/2> 0) {
+            if (keys[this.control.left] && this.x -halfSize> 0) {
                 this.x -= this.speed;
             }
-            if (keys[this.control.down] && this.y + this.size/2 < h) {
+            if (keys[this.control.down] && this.y + halfSize < h) {
                 this.y += this.speed;
             }
-            if (keys[this.control.up] && this.y -this.size/2> 0) {
+            if (keys[this.control.up] && this.y -halfSize> 0) {
                 this.y -= this.speed;
             }
         }
@@ -84,27 +85,42 @@ class Player {
         setTimeout(() => {
             this.x = this.initialX;
             this.y = this.initialY;
-        }, 210);
+        }, 160);
     }
-    
-}
+    checkCollisionWithPlayer(otherPlayer) {
+        let halfSize = this.size / 2;
+        let otherHalfSize = otherPlayer.size / 2;
 
-class Score {
-    constructor(joueur) {
-        this.joueur = joueur;  // Nom du joueur (par exemple "Joueur 1")
-        this.score = 0;         // Score initial du joueur
-    }
+        if (
+            this.x + halfSize > otherPlayer.x - otherHalfSize &&
+            this.x - halfSize < otherPlayer.x + otherHalfSize &&
+            this.y + halfSize > otherPlayer.y - otherHalfSize &&
+            this.y - halfSize < otherPlayer.y + otherHalfSize
+        ) {
+            //detecter les directions de déplacement et repousser les joueurs
+            if (keys[this.control.right] && this.x < otherPlayer.x && otherPlayer.x < w - otherHalfSize) {
+                let overlapX = (this.x + halfSize) - (otherPlayer.x - otherHalfSize);
+                this.x -= Math.min(overlapX, this.speed);
+                otherPlayer.x += Math.min(overlapX, this.speed);
+            }
 
-    // Fonction pour attribuer les points en fonction de la position
-    attribuerPoints(position) {
-        if (position === 1) {
-            this.score = 10; // Premier obtient 10 points
-        } else if (position === 2) {
-            this.score = 6; // Deuxième obtient 6 points
-        } else if (position === 3) {
-            this.score = 3; // Troisième obtient 3 points
-        } else {
-            this.score = 0; // Quatrième obtient 0 points
+            if (keys[this.control.left] && this.x > otherPlayer.x && otherPlayer.x > otherHalfSize) {
+                let overlapX = (otherPlayer.x + otherHalfSize) - (this.x - halfSize);
+                this.x += Math.min(overlapX, this.speed);
+                otherPlayer.x -= Math.min(overlapX, this.speed);
+            }
+
+            if (keys[this.control.down] && this.y < otherPlayer.y && otherPlayer.y < h - otherHalfSize) {
+                let overlapY = (this.y + halfSize) - (otherPlayer.y - otherHalfSize);
+                this.y -= Math.min(overlapY, this.speed);
+                otherPlayer.y += Math.min(overlapY, this.speed);
+            }
+
+            if (keys[this.control.up] && this.y > otherPlayer.y && otherPlayer.y > otherHalfSize) {
+                let overlapY = (otherPlayer.y + otherHalfSize) - (this.y - halfSize);
+                this.y += Math.min(overlapY, this.speed);
+                otherPlayer.y -= Math.min(overlapY, this.speed);
+            }
         }
     }
 }
@@ -138,15 +154,15 @@ class Obstacle {
             player.y + playerHalfSize > this.y - halfH &&
             player.y - playerHalfSize < this.y + halfH
         ) {
-            if (player.x < this.x && keys["ArrowRight"]) {
+            if (player.x < this.x && keys[player.control.right]) {
                 player.x -= player.speed;//annule mouvement vers la droite
-            } else if (player.x > this.x && keys["ArrowLeft"]) {
+            } else if (player.x > this.x && keys[player.control.left]) {
                 player.x += player.speed;
             }
     
-            if (player.y < this.y && keys["ArrowDown"]) {
+            if (player.y < this.y && keys[player.control.down]) {
                 player.y -= player.speed;//annule mouvement vers le bas
-            } else if (player.y > this.y && keys["ArrowUp"]) {
+            } else if (player.y > this.y && keys[player.control.up]) {
                 player.y += player.speed;
             }
     
@@ -200,6 +216,10 @@ class ExitGate{
         this.size=size;
         this.color="white";
         this.Listeplayers=[];
+        this.move=false;
+        this.speedX = 2;
+        this.speedY = 2;
+        this.choix="X";"X ou Y"
     }
     draw(){
         ctx.save();
@@ -235,25 +255,52 @@ class ExitGate{
                 for(let i=0;i<this.Listeplayers.length;i++){
                     this.Listeplayers[i].score+=pointmax;
                     pointmax--;
-                    console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
+                    //console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
                 }
             }
+            players.forEach((player, index) => {
+                // Mettre à jour le texte du score du joueur dans l'élément HTML
+                document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
+            });
         }
-        players.forEach((player, index) => {
-            // Mettre à jour le texte du score du joueur dans l'élément HTML
-            document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-        });
     }
     resetForNextLevel() {
         this.Listeplayers=[];
+        this.move=false;
     }
-    moving(XouY){
-        if(XouY==="X"){
-            this.x+=1;
+    changemove(){
+        if(this.move){
+            this.move=false;
         }
-        if(XouY==="Y"){
-            this.y+=1;
-        }
+        else{this.move=true;}
+    }
+    moving() {
+        if(this.move===true){
+            if (this.choix === "X") {
+                this.x += this.speedX;
+                if (this.x + this.size / 2 > w || this.x - this.size / 2 < 0) {
+                    this.speedX = -this.speedX;
+                }
+            }
+            if (this.choix === "Y") {
+                this.y += this.speedY;
+                if (this.y + this.size / 2 > h || this.y - this.size / 2 < 0) {
+                    this.speedY = -this.speedY;
+                }
+            }
+            if (this.choix === "XY") {
+                this.x += this.speedX;
+                this.y += this.speedY;
+    
+                if (this.x + this.size / 2 > w || this.x - this.size / 2 < 0) {
+                    this.speedX = -this.speedX;
+                }
+
+                if (this.y + this.size / 2 > h || this.y - this.size / 2 < 0) {
+                    this.speedY = -this.speedY;
+                }
+            }
+        } 
     }
 }
 
@@ -278,10 +325,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const playersSelect = document.getElementById('players');
     const playerColorsDiv = document.getElementById('playerColors');
     const startGameButton = document.getElementById('startGame');
-    
-    //Fonction pour générer les couleurs pour chaque joueur
-    function generatePlayerColorOptions(numPlayers) {
-        playerColorsDiv.innerHTML = ''; //On efface les anciennes options
+    const exitButton = document.getElementById('ExitButton'); 
+        function generatePlayerColorOptions(numPlayers) {
+        playerColorsDiv.innerHTML = ''; 
         const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
         for (let i = 1; i <= numPlayers; i++) {
             const label = document.createElement('label');
@@ -291,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = 'color';
             input.id = `colorPlayer${i}`;
             input.name = `colorPlayer${i}`;
-            input.value = predefinedColors[i - 1];//Attribuer la couleur définie
+            input.value = predefinedColors[i - 1];
             
             playerColorsDiv.appendChild(label);
             playerColorsDiv.appendChild(input);
@@ -299,17 +345,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    //Événement lorsque le nombre de joueurs est changé
     playersSelect.addEventListener('change', function () {
         generatePlayerColorOptions(playersSelect.value);
     });
 
-    //Initialiser avec 1 joueur par défaut
     generatePlayerColorOptions(playersSelect.value);
-
-    //Quand le bouton 'Commencer le jeu' est cliqué
     startGameButton.addEventListener('click', function () {
-        //Récupérer les informations des joueurs
         const numPlayers = playersSelect.value;
         const playerColors = [];
         for (let i = 1; i <= numPlayers; i++) {
@@ -317,22 +358,32 @@ document.addEventListener('DOMContentLoaded', function () {
             playerColors.push(colorInput.value);
         }
 
-        //Cacher le menu et afficher le jeu
         menu.style.display = 'none';
         game.style.display = 'block';
         
         initGame(numPlayers, playerColors);
+
+        exitButton.style.display = 'block';
     });
 
-    //Fonction pour initialiser le jeu avec les info des joueurs
     function initGame(numPlayers, playerColors) {
+        players = [];  
         for (let i = 0; i < numPlayers; i++) {
-            players.push(new Player(i + 1, `Joueur ${i + 1}`, 30+ i * 30, 30 , playerColors[i]));
+            players.push(new Player(i + 1, `Joueur ${i + 1}`, 20 + i * 30, 20, playerColors[i]));
         }
         
-        c = new ExitGate(w/2,h/2,25);
+        c = new ExitGate(w / 2, h / 2, 25);  
         mainLoop();
     }
+
+    exitButton.addEventListener('click', function () {
+        game.style.display = 'none';
+        menu.style.display = 'block';
+        exitButton.style.display = 'none';
+        ingame = false;  
+        
+        cancelAnimationFrame(mainLoop);  
+    });
 });
 
 function drawRect(x, y, width, height, c) {
@@ -342,50 +393,10 @@ function drawRect(x, y, width, height, c) {
     ctx.restore();
 }
 
-function Menu(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Roboto";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("Course Cube", w / 2, h / 2 - 50);
-    ctx.restore();
-
-    const startButton = document.getElementById("StartButton");
-    startButton.style.display = "block";
-
-    startButton.addEventListener("click", function() {
-        ingame=true;
-        mainLoop();
-        
-    });
-
-}
-const exitButton = document.getElementById("ExitButton");
-exitButton.style.display = "block";
-exitButton.addEventListener("click", function() {
-    ingame=false;
-    exitgame();
-});
-
-function exitgame(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Roboto";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("C fini", w / 2, h / 2 - 50);
-    ctx.restore();
-    cancelAnimationFrame(mainLoop);//inutile
-}
-
-
-
 function initObstacles(niveau) {
-    obstacles = []; // Réinitialiser les obstacles à chaque niveau
+    obstacles = [];
     switch (niveau) {
         case 1:
-            
             break;
         case 2:
             // Niveau 2 : Deux obstacles simples
@@ -396,24 +407,29 @@ function initObstacles(niveau) {
 
         case 3:
             // Niveau 3 : Trois obstacles fixes
-            obstacles.push(new Obstacle(250, 0, 50, 400, false, false, "red"));
-            obstacles.push(new Obstacle(500, 0, 50, 400, false, false, "blue"));
-            obstacles.push(new Obstacle(0, 300, 600, 20, false, false, "red"));
-            obstacles.push(new Obstacle(700, 300, 500, 20, false, false, "red"));
-            c.modifyCoordExitGate(w/2, 600);
+            obstacles.push(new Obstacle(150, 0, 10, 1000, false, false, "red"));
+            obstacles.push(new Obstacle(500, 600, 10, 1000, false, false, "green"));
+            obstacles.push(new Obstacle(150, 600, 10, 100, false, false, "red"));
+            obstacles.push(new Obstacle(500, 300, 300, 10, false, false, "green"));
+            obstacles.push(new Obstacle(220, 200, 300, 10, false, false, "red"));
+            c.modifyCoordExitGate(600, 600);
             break;
 
         case 4:
             // Niveau 4 : Obstacles plus larges et différents
-            obstacles.push(new Obstacle(150, 50, 50, 150, true, ["X",1], "purple"));
-            obstacles.push(new Obstacle(200, 200, 620, 50, false, false, "yellow"));
-            obstacles.push(new Obstacle(600, 100, 30, 200, false, false, "blue"));
-            c.modifyCoordExitGate(500, 500);
+            obstacles.push(new Obstacle(250, 0, 50, 400, false, false, "blue"));
+            obstacles.push(new Obstacle(500, 0, 50, 400, false, false, "blue"));
+            obstacles.push(new Obstacle(0, 300, 600, 20, false, false, "red"));
+            obstacles.push(new Obstacle(700, 300, 500, 20, false, false, "red"));
+            obstacles.push(new Obstacle(360, 500, 500, 20, false, false, "red"));
+            obstacles.push(new Obstacle(200, 500, 10, 200, false, false, "blue"));
+            obstacles.push(new Obstacle(550, 500, 10, 200, false, false, "blue"));
+            c.modifyCoordExitGate(w/2, 600);
             break;
 
         case 5:
             // Niveau 5 : Quatre obstacles
-            obstacles.push(new Obstacle(100, 0, 50, 350, false, false, "orange"));
+            obstacles.push(new Obstacle(150, 0, 50, 350, false, false, "orange"));
             obstacles.push(new Obstacle(300, 200, 100, 50, true, ["X",2], "red"));
             obstacles.push(new Obstacle(450, 350, 50, 100, true, ["Y",2], "green"));
             obstacles.push(new Obstacle(600, 400, 100, 50, true, ["X",2], "blue"));
@@ -422,7 +438,7 @@ function initObstacles(niveau) {
 
         case 6:
             // Niveau 6 : Plus d'obstacles fixes, disposition plus complexe
-            obstacles.push(new Obstacle(100, 150, 50, 100, true, ["Y",2], "purple"));
+            obstacles.push(new Obstacle(150, 150, 50, 100, true, ["Y",2], "purple"));//avec d'autre forme
             obstacles.push(new Obstacle(200, 300, 100, 50, true, ["X",2], "green"));
             obstacles.push(new Obstacle(400, 100, 150, 50, true, ["X",2], "red"));
             obstacles.push(new Obstacle(550, 400, 50, 150, true, ["Y",2], "yellow"));
@@ -433,7 +449,7 @@ function initObstacles(niveau) {
             // Niveau 7 : Obstacles avec plus de variétés
             obstacles.push(new Obstacle(150, 0, 50, 200, true, false, "red"));
             obstacles.push(new Obstacle(350, 150, 100, 50, true, ["Y",2], "blue"));
-            obstacles.push(new Obstacle(550, 300, 50, 100, true, ["Y",2], "green"));
+            obstacles.push(new Obstacle(550, 300, 50, 100, true, ["Y",4], "green"));
             obstacles.push(new Obstacle(300, 400, 150, 50, true, ["Y",3], "purple"));
             obstacles.push(new Obstacle(100, 450, 50, 100, true, ["Y",3], "orange"));
             c.modifyCoordExitGate(600, 50);
@@ -442,108 +458,146 @@ function initObstacles(niveau) {
         case 8:
             // Niveau 8 : Obstacles plus nombreux
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "green"));
-            obstacles.push(new Obstacle(300, 400, 200, 20, false, false, "blue"));
+            obstacles.push(new Obstacle(300, 400, 200, 20, true, ["X",3], "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 400, false, false, "red"));
-            obstacles.push(new Obstacle(600, 300, 50, 150, false, false, "yellow"));
+            obstacles.push(new Obstacle(300, 400, 200, 20, true, ["Y",-2], "blue"));
+            obstacles.push(new Obstacle(600, 300, 50, 150, true, ["Y",2], "yellow"));
             c.modifyCoordExitGate(600, 50);
             break;
 
         case 9:
             // Niveau 9 : Obstacles avec plus de complexité
-            obstacles.push(new Obstacle(150, 100, 50, 200, false, false, "purple"));
-            obstacles.push(new Obstacle(300, 200, 100, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(450, 100, 50, 200, false, false, "green"));
-            obstacles.push(new Obstacle(600, 250, 150, 50, false, false, "red"));
-            c.modifyCoordExitGate(600, 50);
+            obstacles.push(new Obstacle(300, 50, 50, 150, true, ["X",-1.5], "purple"));
+            obstacles.push(new Obstacle(200, 200, 620, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(600, 350, 620, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(100, 500, 50, 200, true, ["X",2], "blue"));
+            c.modifyCoordExitGate(700, 500);
             break;
 
         case 10:
             // Niveau 10 : Obstacles larges et étroits
-            obstacles.push(new Obstacle(100, 150, 300, 50, false, false, "yellow"));
-            obstacles.push(new Obstacle(400, 100, 100, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(200, 350, 50, 150, false, false, "purple"));
-            c.modifyCoordExitGate(600, 50);
+            obstacles.push(new Obstacle(150, 150, 300, 50, true, ["X",6], "yellow"));
+            obstacles.push(new Obstacle(400, 100, 100, 50, true, ["Y",6], "blue"));
+            obstacles.push(new Obstacle(200, 350, 50, 150, true, ["X",6], "purple"));
+            c.modifyCoordExitGate(600, 500);
             break;
 
         case 11:
             // Niveau 11 : Obstacle complexe au centre
-            obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",3], "green"));
+            obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",6], "green"));
             obstacles.push(new Obstacle(100, 100, 100, 50, true, ["Y",3], "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(300, 600, 100, 100, true, ["X",3], "red"));
             c.modifyCoordExitGate(50, 600);
             break;
 
         case 12:
             // Niveau 12 : Mélange de petits et grands obstacles
-            obstacles.push(new Obstacle(100, 100, 100, 100, false, false, "orange"));
-            obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "red"));
-            obstacles.push(new Obstacle(500, 350, 100, 200, false, false, "green"));
+            obstacles.push(new Obstacle(100, 100, 100, 100, true, ["X",4], "orange"));
+            obstacles.push(new Obstacle(500, 200, 150, 50, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(100, 500, 150, 50, true, ["X",3], "pink"));
+            obstacles.push(new Obstacle(500, 350, 100, 200, true, ["Y",6], "green"));
             c.modifyCoordExitGate(500, 500);
             break;
 
         case 13:
             // Niveau 13 : Obstacles en forme de couloirs
-            obstacles.push(new Obstacle(100, 100, 400, 20, false, false, "purple"));
-            obstacles.push(new Obstacle(200, 300, 300, 20, false, false, "blue"));
-            obstacles.push(new Obstacle(400, 400, 20, 150, false, false, "yellow"));
+            obstacles.push(new Obstacle(200, 100, 400, 20, true, ["X",4], "purple"));
+            obstacles.push(new Obstacle(500, 300, 300, 20, true, ["X",4], "blue"));
+            obstacles.push(new Obstacle(500, 100, 20, 630, false, false, "yellow"));
+            obstacles.push(new Obstacle(500, 530, 20, 200, true, ["X",6], "green"));
             c.modifyCoordExitGate(600, 50);
             break;
 
         case 14:
             // Niveau 14 : Obstacles en couloirs plus complexes
+            c.choix="Y";
+            c.move=true;
             obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "green"));
-            obstacles.push(new Obstacle(320, 200, 300, 20, false, false, "red"));
-            obstacles.push(new Obstacle(500, 400, 20, 150, false, false, "yellow"));
+            obstacles.push(new Obstacle(320, 200, 300, 20, true, ["X",5], "red"));
+            obstacles.push(new Obstacle(500, 400, 20, 150, true, ["Y",5], "yellow"));
+            obstacles.push(new Obstacle(350, 500, 50, 300, false, false, "green"));
+            obstacles.push(new Obstacle(400, 400, 150, 150, false, false, "green"));
+            obstacles.push(new Obstacle(w, 400, 150, 900, false, false, "green"));
+            obstacles.push(new Obstacle(400, 400, 150, 150, false, false, "green"));
             c.modifyCoordExitGate(600, 50);
             break;
 
         case 15:
             // Niveau 15 : Obstacles plus serrés
+            c.choix="X";
+            c.move=true;
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "blue"));
             obstacles.push(new Obstacle(300, 100, 50, 200, false, false, "purple"));
-            obstacles.push(new Obstacle(500, 300, 100, 100, false, false, "red"));
+            obstacles.push(new Obstacle(500, 300, 100, 100, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(100, 500, 100, 100, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(300, 400, 50, 50, true, ["X",6], "green"));
             c.modifyCoordExitGate(50, 600);
             break;
 
         case 16:
             // Niveau 16 : Grand obstacle au centre
-            obstacles.push(new Obstacle(300, 300, 200, 200, false, false, "orange"));
-            obstacles.push(new Obstacle(100, 50, 100, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(500, 50, 100, 50, false, false, "green"));
+            c.move=true;
+            obstacles.push(new Obstacle(400, 300, 200, 200, true, ["Y",3], "orange"));
+            obstacles.push(new Obstacle(100, 150, 100, 50, true, ["X",5], "blue"));
+            obstacles.push(new Obstacle(500, 150, 100, 50, true, ["X",5], "green"));
             c.modifyCoordExitGate(350, 150);
             break;
 
         case 17:
             // Niveau 17 : Obstacles plus variés
-            obstacles.push(new Obstacle(100, 100, 50, 100, false, false, "purple"));
-            obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "yellow"));
-            obstacles.push(new Obstacle(500, 300, 50, 100, false, false, "red"));
-            obstacles.push(new Obstacle(650, 400, 50, 100, false, false, "green"));
+            c.choix="Y"
+            c.move=true;
+            obstacles.push(new Obstacle(100, 100, 50, 100, true, ["X",3], "purple"));
+            obstacles.push(new Obstacle(300, 200, 150, 50, true, ["Y",3], "yellow"));
+            obstacles.push(new Obstacle(500, 300, 50, 100, true, ["X",-3], "red"));
+            obstacles.push(new Obstacle(650, 400, 50, 100, true, ["X",3], "green"));
             c.modifyCoordExitGate(500, 500);
             break;
 
         case 18:
             // Niveau 18 : Obstacles plus nombreux
+            c.choix="Y"
+            c.move=true;
             obstacles.push(new Obstacle(100, 150, 200, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(300, 300, 100, 50, false, false, "green"));
-            obstacles.push(new Obstacle(500, 100, 100, 200, false, false, "red"));
+            obstacles.push(new Obstacle(300, 300, 100, 50, true, ["X",6], "green"));
+            obstacles.push(new Obstacle(400, 300, 100, 50, true, ["X",-6], "green"));
+            obstacles.push(new Obstacle(300, 300, 100, 50, true, ["Y",-6], "green"));
+            obstacles.push(new Obstacle(500, 100, 100, 200, true, ["Y",6], "red"));
+            obstacles.push(new Obstacle(650, 300, 100, 50, true, ["Y",-6], "green"));
             c.modifyCoordExitGate(650, 250);
             break;
 
         case 19:
             // Niveau 19 : Beaucoup d'obstacles étroits
-            obstacles.push(new Obstacle(100, 100, 50, 300, false, false, "yellow"));
-            obstacles.push(new Obstacle(300, 200, 50, 100, false, false, "red"));
-            obstacles.push(new Obstacle(500, 100, 50, 200, false, false, "green"));
+            c.choix="XY"
+            c.move=true;
+            obstacles.push(new Obstacle(300, 100, 50, 50, true, ["X",-6], "yellow"));
+            obstacles.push(new Obstacle(100, 200, 100, 100, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(500, 100, 50, 50, true, ["Y",-3], "green"));
+
+            obstacles.push(new Obstacle(300, 200, 50, 50, true, ["Y",-3], "yellow"));
+            obstacles.push(new Obstacle(600, 600, 100, 100, true, ["X",-3], "purple"));
+            obstacles.push(new Obstacle(400, 400, 100, 100, true, ["X",-4], "blue"));
+        
             c.modifyCoordExitGate(560, 600);
             break;
 
         case 20:
             // Niveau 20 : Final avec obstacles nombreux et serrés
-            obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "red"));
-            obstacles.push(new Obstacle(300, 200, 50, 200, false, false, "blue"));
-            obstacles.push(new Obstacle(450, 300, 50, 100, false, false, "green"));
-            obstacles.push(new Obstacle(600, 400, 50, 150, false, false, "yellow"));
+            c.choix="XY"
+            c.move=true;
+            obstacles.push(new Obstacle(200, 150, 50, 300, true, ["Y",3], "red"));
+            obstacles.push(new Obstacle(300, 200, 50, 200, true, ["Y",-3], "blue"));
+            obstacles.push(new Obstacle(450, 300, 50, 100, true, ["Y",3], "green"));
+            obstacles.push(new Obstacle(600, 400, 50, 150, true, ["Y",-3], "yellow"));
+            obstacles.push(new Obstacle(300, 100, 50, 50, true, ["X",-6], "yellow"));
+            obstacles.push(new Obstacle(100, 200, 100, 100, true, ["X",3], "red"));
+            obstacles.push(new Obstacle(500, 100, 50, 50, true, ["Y",-3], "green"));
+
+            obstacles.push(new Obstacle(300, 200, 50, 50, true, ["Y",-3], "yellow"));
+            obstacles.push(new Obstacle(600, 600, 100, 100, true, ["X",-3], "purple"));
+            obstacles.push(new Obstacle(400, 400, 100, 100, true, ["X",-4], "blue"));
             c.modifyCoordExitGate(560, 600);
             break;
 
@@ -553,14 +607,12 @@ function initObstacles(niveau) {
     }
 }
 
-
 function afficheNiveau(niveau) {
     // Sélectionner l'élément HTML où afficher le niveau
     const niveauDisplay = document.getElementById("niveauDisplay");
     // Mettre à jour son contenu avec le niveau
     niveauDisplay.textContent = `Niveau : ${niveau}`;
 }
-
 
 function updateCountdown() {//il faut l'afficher
     if (countdownValue > 0) {
@@ -586,12 +638,21 @@ function mainLoop() {
     if (countdownValue > 0) {
         return;
     }
-
+    
     c.draw();
+    c.moving();
     players.forEach(player => {
         player.updatePlayer();
         player.draw();
         c.checkCollision(player);
+    });
+
+    players.forEach(playerA=>{
+        players.forEach(playerB=>{
+           if(playerA!==playerB){
+                playerA.checkCollisionWithPlayer(playerB)
+           }
+        });
     });
 
     obstacles.forEach(obstacle => {
@@ -600,7 +661,6 @@ function mainLoop() {
         players.forEach(player => obstacle.checkCollision(player));
     });
     
-
     if (checkcol) {
         ctx.save();
         ctx.font = "bold 40px 'Press Start 2P', Roboto"; 
@@ -629,14 +689,14 @@ function mainLoop() {
                 return; // Arrêter le jeu
             }
 
-            // Initialiser le niveau suivant
+            //initialiser le niveau suivant
             
             initialiserNiveau();
-            initObstacles(niveau); // Charger les obstacles pour le niveau suivant
             c.resetForNextLevel();
+            initObstacles(niveau); //charger les obstacles pour le niveau suivant
             requestAnimationFrame(mainLoop);
-        }, 2000); // Pause de 2 secondes avant le prochain niveau
-        return; // Suspendre la boucle principale temporairement
+        }, 2000); //pause de 2 secondes avant le prochain niveau
+        return; //suspendre la boucle principale temporairement
     }
     requestAnimationFrame(mainLoop);
 }
