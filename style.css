@@ -116,3 +116,82 @@ body {
 .niveau-container p.niveau-bas {
   color: #ff3300;
 }
+/* menu choix des joueurs */
+.menu-container {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px hsla(168, 100%, 50%, 0.5);
+  color: #fff;
+}
+
+form label, form select, form input {
+  display: block;
+  margin: 10px 0;
+}
+
+form input[type="color"] {
+  width: 50px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+#niveauDisplay {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  color: #333;
+  background-color: #00ffcc;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 10px 15px;
+  text-align: center; 
+  width: max-content; 
+  margin: 20px auto; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+#startGame{
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  color: #333;
+  background-color: #00ffcc;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 10px 15px;
+  text-align: center; 
+  width: max-content; 
+  margin: 20px auto; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+#players{
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  background-color: #00ffcc;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 10px 15px;
+  text-align: center; 
+  width: max-content; 
+  margin: 20px auto; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+#scoreContainer {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Espacement entre les scores */
+  margin-top: 20px;
+}
+
+.score {
+  font-size: 18px;
+  padding: 10px;
+  background-color: #333; /* Fond sombre pour chaque score */
+  border-radius: 5px;
+  text-align: center;
+}
