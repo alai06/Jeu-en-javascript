@@ -376,15 +376,16 @@ document.addEventListener('DOMContentLoaded', function () {
         mainLoop();
     }
 
-    exitButton.addEventListener('click', function () {
-        game.style.display = 'none';
-        menu.style.display = 'block';
-        exitButton.style.display = 'none';
-        ingame = false;  
-        
-        cancelAnimationFrame(mainLoop);  
-    });
 });
+
+/*exitButton.addEventListener('click', function () {
+    game.style.display = 'none';
+    menu.style.display = 'block';
+    exitButton.style.display = 'none';
+    ingame = false;  
+    cancelAnimationFrame(mainLoop);  
+});  ///ne marche pas */ 
+
 
 function drawRect(x, y, width, height, c) {
     ctx.save();
