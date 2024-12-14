@@ -29,7 +29,7 @@ class Player {
         this.y=y;
         this.size=20;
         this.color=color;
-        this.speed=3;
+        this.speed=10;
         this.score=0;
         this.control=controls[this.id-1];
     }
@@ -106,53 +106,48 @@ class Obstacle {
         let halfW = this.w / 2;
         let halfH = this.h / 2;
         let playerHalfSize = player.size / 2;
-        if(!this.move){
-            if (
-                player.x + playerHalfSize > this.x - halfW && //Collision côté droit du joueur
-                player.x - playerHalfSize < this.x + halfW && //Collision côté gauche du joueur
-                player.y + playerHalfSize > this.y - halfH && //Collision bas du joueur
-                player.y - playerHalfSize < this.y + halfH //Collision haut du joueur
-            ) {
-                if (player.x < this.x && keys["ArrowRight"]) {
-                    player.x -= player.speed; //annule déplacement vers la droite
-                } else if (player.x > this.x && keys["ArrowLeft"]) {
-                    player.x += player.speed; //annule déplacement vers la gauche
-                }
-
-                if (player.y < this.y && keys["ArrowDown"]) {
-                    player.y -= player.speed; //annule déplacement vers le bas
-                } else if (player.y > this.y && keys["ArrowUp"]) {
-                    player.y += player.speed; //annule déplacement vers le haut
-                }
+    
+        if (
+            player.x + playerHalfSize > this.x - halfW && //collision rebord droit
+            player.x - playerHalfSize < this.x + halfW &&
+            player.y + playerHalfSize > this.y - halfH &&
+            player.y - playerHalfSize < this.y + halfH
+        ) {
+            if (player.x < this.x && keys["ArrowRight"]) {
+                player.x -= player.speed;//annule mouvement vers la droite
+            } else if (player.x > this.x && keys["ArrowLeft"]) {
+                player.x += player.speed;
             }
-        }
-        else{
-            if (
-                player.x + playerHalfSize > this.x - halfW && //Collision côté droit du joueur
-                player.x - playerHalfSize < this.x + halfW && //Collision côté gauche du joueur
-                player.y + playerHalfSize > this.y - halfH && //Collision bas du joueur
-                player.y - playerHalfSize < this.y + halfH //Collision haut du joueur
-            ) {
-                if (player.x < this.x && keys["ArrowRight"]) {
-                    player.x -= player.speed; //annule déplacement vers la droite
-                } else if (player.x > this.x && keys["ArrowLeft"]) {
-                    player.x += player.speed; //annule déplacement vers la gauche
-                }
-
-                if (player.y < this.y && keys["ArrowDown"]) {
-                    player.y -= player.speed; //annule déplacement vers le bas
-                } else if (player.y > this.y && keys["ArrowUp"]) {
-                    player.y += player.speed; //annule déplacement vers le haut
-                }
+    
+            if (player.y < this.y && keys["ArrowDown"]) {
+                player.y -= player.speed;//annule mouvement vers le bas
+            } else if (player.y > this.y && keys["ArrowUp"]) {
+                player.y += player.speed;
+            }
+    
+            if (this.move) {
                 player.x += this.speedX;
                 player.y += this.speedY;
-                if(player.x<10){player.BornAgain();}
-                if(player.x>w){player.BornAgain();}
-                if(player.y<10){player.BornAgain();}
-                if(player.y>h){player.BornAgain();}
+    
+                if (player.x < 10 || player.x > w || player.y < 10 || player.y > h) {
+                    player.BornAgain();
+                }
+                obstacles.forEach(otherObstacle => {
+                    if (otherObstacle !== this) {
+                        if (
+                            player.x < otherObstacle.x + otherObstacle.w &&
+                            player.x + playerHalfSize > otherObstacle.x &&
+                            player.y < otherObstacle.y + otherObstacle.h &&
+                            player.y + playerHalfSize > otherObstacle.y
+                        ) {
+                            player.BornAgain();
+                        }
+                    }
+                });
             }
         }
     }
+    
     draw(){
         drawRect(this.x, this.y, this.w, this.h, this.color);
     }
@@ -161,13 +156,13 @@ class Obstacle {
             this.x +=this.speedX;
             this.y += this.speedY;
 
-            // Rebond sur les bords de l'écran
+            //Rebond sur les bords de l'écran
             if (this.x + this.w / 2 > w || this.x - this.w / 2 < 0) {
-                this.speedX = -this.speedX; // Inverser la direction en X
+                this.speedX = -this.speedX;//Inverser la direction en X
             }
 
             if (this.y + this.h / 2 > h || this.y - this.h / 2 < 0) {
-                this.speedY = -this.speedY; // Inverser la direction en Y si tu veux du mouvement vertical
+                this.speedY = -this.speedY;//Inverser la direction en Y si tu veux du mouvement vertical
             }
         }
     }
@@ -213,6 +208,7 @@ class ExitGate{
         ) {
             //console.log("Collision détectée : Vous avez touché l'objectif !");
         checkcol=true;
+        niveau++;
         }
     }
     moving(XouY){
@@ -592,7 +588,6 @@ function mainLoop() {
 
         setTimeout(() => {
             // Passer au niveau suivant
-            niveau++;
 
             if (niveau > dernier_niv) {
                 console.log("Félicitations, vous avez terminé le jeu !");
