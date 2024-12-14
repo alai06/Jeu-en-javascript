@@ -33,6 +33,8 @@ class Player {
         this.score=0;
         this.control=controls[this.id-1];
         this.exit=false;
+        this.initialX=this.x;
+        this.initialY=this.y;
     }
     draw(){
         if(!this.exit){
@@ -75,13 +77,13 @@ class Player {
         
     }
     resetPosition() {
-        this.x = 30;
-        this.y = 30;
+        this.x = this.initialX;
+        this.y = this.initialY;
     }
     BornAgain(){
         setTimeout(() => {
-            this.x = 30;
-            this.y = 30;
+            this.x = this.initialX;
+            this.y = this.initialY;
         }, 210);
     }
     
@@ -171,25 +173,13 @@ class Obstacle {
     }
 }
 
-class Score{
-    constructor(f,s,t,l){
-        this.first=f;
-        this.second=s;
-        this.third=t;
-        this.last=l;
-    }
-    addingScore(){
-        
-    }
-}
-
 class ExitGate{
     constructor(x,y,size){
         this.x=x;
         this.y=y;
         this.size=size;
         this.color="white";
-        this.players=new Set();
+        this.Listeplayers=[];
     }
     draw(){
         ctx.save();
@@ -215,16 +205,23 @@ class ExitGate{
             !player.exit
         ) {
             player.exit=true;
-            this.players.add(player.id);
-            if (this.players.size === players.length) {
+            this.Listeplayers.push(player);
+            if (this.Listeplayers.length === players.length) {
                 checkcol = true;
             }
-
-
+            var pointmax =3;
+            if(players.length===1){players[0].score+=1;}
+            else{
+                for(let i=0;i<this.Listeplayers.length;i++){
+                    this.Listeplayers[i].score=pointmax;
+                    pointmax--;
+                    console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
+                }
+            }
         }
     }
     resetForNextLevel() {
-        this.playersReached.clear();
+        this.Listeplayers=[];
     }
     moving(XouY){
         if(XouY==="X"){
@@ -529,7 +526,7 @@ function initObstacles(niveau) {
     }
 }
 
-function afficheNiveau(niveau) {
+function afficheNiveau(niveau) {//inutile
     ctx.save();
     ctx.font = "20px Arial";
     ctx.fillStyle = "blue";
@@ -537,7 +534,7 @@ function afficheNiveau(niveau) {
     ctx.restore();
 }
 
-function updateCountdown() {
+function updateCountdown() {//il faut l'afficher
     if (countdownValue > 0) {
         countdownValue--;
         countdownElement.textContent = countdownValue;
@@ -547,7 +544,7 @@ function updateCountdown() {
         countdownElement.textContent = "GO!"; // Afficher "GO!" ou autre
     }
 }
-function initialiserNiveau(niveau) {//modifier
+function initialiserNiveau() {//modifier
     players.forEach(player => {
         player.resetPosition();
         player.exit=false;
@@ -601,7 +598,7 @@ function mainLoop() {
 
             // Initialiser le niveau suivant
             
-            initialiserNiveau(niveau);
+            initialiserNiveau();
             initObstacles(niveau); // Charger les obstacles pour le niveau suivant
             c.resetForNextLevel();
             requestAnimationFrame(mainLoop);
