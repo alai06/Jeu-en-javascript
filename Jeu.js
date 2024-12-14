@@ -3,7 +3,7 @@ var obstacles = [];
 var player; // Le joueur
 var keys = {}; // Suivi des touches pressées
 var win = 0; // Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=3;
+var niveau=1;
 var dernier_niv=20;
 var c;
 var ingame;
@@ -68,8 +68,14 @@ class Player {
         
     }
     resetPosition() {
-        this.x = 10;
-        this.y = 10;
+        this.x = 30;
+        this.y = 30;
+    }
+    BornAgain(){
+        setTimeout(() => {
+            this.x = 30;
+            this.y = 30;
+        }, 210);
     }
     
 }
@@ -136,6 +142,10 @@ class Obstacle {
                 }
                 player.x += this.speedX;
                 player.y += this.speedY;
+                if(player.x<10){player.BornAgain();}
+                if(player.x>w){player.BornAgain();}
+                if(player.y<10){player.BornAgain();}
+                if(player.y>h){player.BornAgain();}
             }
         }
     }
@@ -199,6 +209,14 @@ class ExitGate{
         ) {
             //console.log("Collision détectée : Vous avez touché l'objectif !");
         checkcol=true;
+        }
+    }
+    moving(XouY){
+        if(XouY==="X"){
+            this.x+=1;
+        }
+        if(XouY==="Y"){
+            this.y+=1;
         }
     }
 }
@@ -302,36 +320,36 @@ function initObstacles(niveau) {
         case 4:
             // Niveau 4 : Obstacles plus larges et différents
             obstacles.push(new Obstacle(150, 50, 50, 150, true, ["X",1], "purple"));
-            /*obstacles.push(new Obstacle(400, 200, 150, 50, false, false, "yellow"));
+            obstacles.push(new Obstacle(200, 200, 620, 50, false, false, "yellow"));
             obstacles.push(new Obstacle(600, 100, 30, 200, false, false, "blue"));
-            c.modifyCoordExitGate(500, 500);*/
+            c.modifyCoordExitGate(500, 500);
             break;
 
         case 5:
             // Niveau 5 : Quatre obstacles
-            obstacles.push(new Obstacle(100, 100, 50, 150, false, false, "orange"));
-            obstacles.push(new Obstacle(300, 200, 100, 50, true, ["X",1], "red"));
-            obstacles.push(new Obstacle(450, 350, 50, 100, true, ["Y",1], "green"));
-            obstacles.push(new Obstacle(600, 400, 100, 50, false, false, "blue"));
+            obstacles.push(new Obstacle(100, 0, 50, 350, false, false, "orange"));
+            obstacles.push(new Obstacle(300, 200, 100, 50, true, ["X",2], "red"));
+            obstacles.push(new Obstacle(450, 350, 50, 100, true, ["Y",2], "green"));
+            obstacles.push(new Obstacle(600, 400, 100, 50, true, ["X",2], "blue"));
             c.modifyCoordExitGate(650, 50);
             break;
 
         case 6:
             // Niveau 6 : Plus d'obstacles fixes, disposition plus complexe
-            obstacles.push(new Obstacle(100, 150, 50, 100, false, false, "purple"));
-            obstacles.push(new Obstacle(200, 300, 100, 50, false, false, "green"));
-            obstacles.push(new Obstacle(400, 100, 150, 50, false, false, "red"));
-            obstacles.push(new Obstacle(550, 400, 50, 150, false, false, "yellow"));
-            c.modifyCoordExitGate(50, 600);
+            obstacles.push(new Obstacle(100, 150, 50, 100, true, ["Y",2], "purple"));
+            obstacles.push(new Obstacle(200, 300, 100, 50, true, ["X",2], "green"));
+            obstacles.push(new Obstacle(400, 100, 150, 50, true, ["X",2], "red"));
+            obstacles.push(new Obstacle(550, 400, 50, 150, true, ["Y",2], "yellow"));
+            c.modifyCoordExitGate(w/2, h/2);
             break;
 
         case 7:
             // Niveau 7 : Obstacles avec plus de variétés
-            obstacles.push(new Obstacle(150, 0, 50, 200, false, false, "red"));
-            obstacles.push(new Obstacle(350, 150, 100, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(550, 300, 50, 100, false, false, "green"));
-            obstacles.push(new Obstacle(300, 400, 150, 50, false, false, "purple"));
-            obstacles.push(new Obstacle(100, 450, 50, 100, false, false, "orange"));
+            obstacles.push(new Obstacle(150, 0, 50, 200, true, false, "red"));
+            obstacles.push(new Obstacle(350, 150, 100, 50, true, ["Y",2], "blue"));
+            obstacles.push(new Obstacle(550, 300, 50, 100, true, ["Y",2], "green"));
+            obstacles.push(new Obstacle(300, 400, 150, 50, true, ["Y",3], "purple"));
+            obstacles.push(new Obstacle(100, 450, 50, 100, true, ["Y",3], "orange"));
             c.modifyCoordExitGate(600, 50);
             break;
 
@@ -341,7 +359,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(300, 400, 200, 20, false, false, "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 400, false, false, "red"));
             obstacles.push(new Obstacle(600, 300, 50, 150, false, false, "yellow"));
-            c.modifyCoordExitGate(100, 50);
+            c.modifyCoordExitGate(600, 50);
             break;
 
         case 9:
@@ -350,7 +368,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(300, 200, 100, 50, false, false, "blue"));
             obstacles.push(new Obstacle(450, 100, 50, 200, false, false, "green"));
             obstacles.push(new Obstacle(600, 250, 150, 50, false, false, "red"));
-            c.modifyCoordExitGate(50, 500);
+            c.modifyCoordExitGate(600, 50);
             break;
 
         case 10:
@@ -363,9 +381,9 @@ function initObstacles(niveau) {
 
         case 11:
             // Niveau 11 : Obstacle complexe au centre
-            obstacles.push(new Obstacle(300, 300, 200, 200, false, false, "green"));
-            obstacles.push(new Obstacle(100, 100, 100, 50, false, false, "blue"));
-            obstacles.push(new Obstacle(500, 50, 100, 50, false, false, "red"));
+            obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",3], "green"));
+            obstacles.push(new Obstacle(100, 100, 100, 50, true, ["Y",3], "blue"));
+            obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
             c.modifyCoordExitGate(50, 600);
             break;
 
@@ -374,7 +392,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(100, 100, 100, 100, false, false, "orange"));
             obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "red"));
             obstacles.push(new Obstacle(500, 350, 100, 200, false, false, "green"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(500, 500);
             break;
 
         case 13:
@@ -388,9 +406,9 @@ function initObstacles(niveau) {
         case 14:
             // Niveau 14 : Obstacles en couloirs plus complexes
             obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "green"));
-            obstacles.push(new Obstacle(300, 200, 300, 20, false, false, "red"));
+            obstacles.push(new Obstacle(320, 200, 300, 20, false, false, "red"));
             obstacles.push(new Obstacle(500, 400, 20, 150, false, false, "yellow"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(600, 50);
             break;
 
         case 15:
@@ -406,7 +424,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(300, 300, 200, 200, false, false, "orange"));
             obstacles.push(new Obstacle(100, 50, 100, 50, false, false, "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, false, false, "green"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(350, 150);
             break;
 
         case 17:
@@ -415,7 +433,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(300, 200, 150, 50, false, false, "yellow"));
             obstacles.push(new Obstacle(500, 300, 50, 100, false, false, "red"));
             obstacles.push(new Obstacle(650, 400, 50, 100, false, false, "green"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(500, 500);
             break;
 
         case 18:
@@ -423,7 +441,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(100, 150, 200, 50, false, false, "blue"));
             obstacles.push(new Obstacle(300, 300, 100, 50, false, false, "green"));
             obstacles.push(new Obstacle(500, 100, 100, 200, false, false, "red"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(650, 250);
             break;
 
         case 19:
@@ -431,7 +449,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(100, 100, 50, 300, false, false, "yellow"));
             obstacles.push(new Obstacle(300, 200, 50, 100, false, false, "red"));
             obstacles.push(new Obstacle(500, 100, 50, 200, false, false, "green"));
-            c.modifyCoordExitGate(50, 600);
+            c.modifyCoordExitGate(560, 600);
             break;
 
         case 20:
@@ -440,7 +458,7 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(300, 200, 50, 200, false, false, "blue"));
             obstacles.push(new Obstacle(450, 300, 50, 100, false, false, "green"));
             obstacles.push(new Obstacle(600, 400, 50, 150, false, false, "yellow"));
-            c.modifyCoordExitGate(50, 50);
+            c.modifyCoordExitGate(560, 600);
             break;
 
         default:
