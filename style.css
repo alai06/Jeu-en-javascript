@@ -23,7 +23,7 @@ body {
   background: rgba(0, 0, 0, 0.7);
   padding: 20px 40px;
   border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 255, 204, 0.5);
+  box-shadow: 0 4px 20px #00ffcc;
   animation: pulse 2s infinite;
 }
 
