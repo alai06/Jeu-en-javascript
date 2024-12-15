@@ -5,7 +5,6 @@ var keys = {}; //Suivi des touches pressées
 var niveau=1;
 var dernier_niv=20;
 var c;
-var ingame;
 var timerValue;
 var checkcol=false;//variable pour detecter une collision
 const countdownElement = document.getElementById('countdown'); // Ajoutez cet élément HTML dans votre page
