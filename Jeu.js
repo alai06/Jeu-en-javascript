@@ -249,20 +249,20 @@ class ExitGate{
             if (this.Listeplayers.length === players.length) {
                 checkcol = true;
             }
-            var pointmax =3;
-            if(players.length===1){players[0].score+=1;}
-            else{
-                for(let i=0;i<this.Listeplayers.length;i++){
-                    this.Listeplayers[i].score+=pointmax;
-                    pointmax--;
-                    //console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
-                }
-            }
-            players.forEach((player, index) => {
-                // Mettre à jour le texte du score du joueur dans l'élément HTML
-                document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-            });
         }
+    }
+    addingScore(){
+        if(players.length===1){players[0].score+=1;}
+        else{
+            var pointmax =3;
+            for(let i=0;i<this.Listeplayers.length;i++){
+                this.Listeplayers[i].score+=pointmax;
+                pointmax--;
+            }
+        }
+        /*players.forEach((player, index) => {
+            document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
+        });*/
     }
     resetForNextLevel() {
         this.Listeplayers=[];
@@ -367,9 +367,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function initGame(numPlayers, playerColors) {
+        
         players = [];  
         for (let i = 0; i < numPlayers; i++) {
             players.push(new Player(i + 1, `Joueur ${i + 1}`, 20 + i * 30, 20, playerColors[i]));
+            const scoreElement = document.getElementById(`scorePlayer${i + 1}`);
+            scoreElement.style.display="block";
         }
         
         c = new ExitGate(w / 2, h / 2, 25);  
@@ -639,7 +642,6 @@ function mainLoop() {
     if (countdownValue > 0) {
         return;
     }
-    
     c.draw();
     c.moving();
     players.forEach(player => {
@@ -691,7 +693,7 @@ function mainLoop() {
             }
 
             //initialiser le niveau suivant
-            
+            c.addingScore();
             initialiserNiveau();
             c.resetForNextLevel();
             initObstacles(niveau); //charger les obstacles pour le niveau suivant
