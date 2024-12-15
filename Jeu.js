@@ -98,50 +98,41 @@ class Player {
         let halfSize = this.size / 2;
         let otherHalfSize = otherPlayer.size / 2;
     
-        // Vérification de la collision entre les deux joueurs
         if (
             this.x + halfSize > otherPlayer.x - otherHalfSize &&
             this.x - halfSize < otherPlayer.x + otherHalfSize &&
             this.y + halfSize > otherPlayer.y - otherHalfSize &&
             this.y - halfSize < otherPlayer.y + otherHalfSize
         ) {
-            // Si le joueur se déplace vers la droite
             if (keys[this.control.right] && this.x < otherPlayer.x) {
-                // Vérifier si otherPlayer est bloqué par un obstacle ou un rebord
-                if (otherPlayer.x + otherHalfSize >= w || this.isBlockedByObstacle()) {
-                    this.x -= this.speed; // J1 s'arrête car J2 est bloqué
+                if (otherPlayer.x + otherHalfSize >= w || otherPlayer.isBlockedByObstacle()) {
+                    this.x -= this.speed;
                 } else {
                     let overlapX = (this.x + halfSize) - (otherPlayer.x - otherHalfSize);
                     this.x -= Math.min(overlapX, this.speed);
                     otherPlayer.x += Math.min(overlapX, this.speed);
                 }
             }
-    
-            // Si le joueur se déplace vers la gauche
             if (keys[this.control.left] && this.x > otherPlayer.x) {
-                if (otherPlayer.x - otherHalfSize <= 0 || this.isBlockedByObstacle()) {
-                    this.x += this.speed; // J1 s'arrête car J2 est bloqué
+                if (otherPlayer.x - otherHalfSize <= 0 || otherPlayer.isBlockedByObstacle()) {
+                    this.x += this.speed;
                 } else {
                     let overlapX = (otherPlayer.x + otherHalfSize) - (this.x - halfSize);
                     this.x += Math.min(overlapX, this.speed);
                     otherPlayer.x -= Math.min(overlapX, this.speed);
                 }
             }
-    
-            // Si le joueur se déplace vers le bas
             if (keys[this.control.down] && this.y < otherPlayer.y) {
-                if (otherPlayer.y + otherHalfSize >= h || this.isBlockedByObstacle()) {
-                    this.y -= this.speed; // J1 s'arrête car J2 est bloqué
+                if (otherPlayer.y + otherHalfSize >= h || otherPlayer.isBlockedByObstacle()) {
+                    this.y -= this.speed;
                 } else {
                     let overlapY = (this.y + halfSize) - (otherPlayer.y - otherHalfSize);
                     this.y -= Math.min(overlapY, this.speed);
                     otherPlayer.y += Math.min(overlapY, this.speed);
                 }
             }
-    
-            // Si le joueur se déplace vers le haut
             if (keys[this.control.up] && this.y > otherPlayer.y) {
-                if (otherPlayer.y - otherHalfSize <= 0 || this.isBlockedByObstacle()) {
+                if (otherPlayer.y - otherHalfSize <= 0 || otherPlayer.isBlockedByObstacle()) {
                     this.y += this.speed;
                 } else {
                     let overlapY = (otherPlayer.y + otherHalfSize) - (this.y - halfSize);
@@ -163,12 +154,11 @@ class Player {
                 this.y + playerHalfSize > obstacle.y - halfH &&
                 this.y - playerHalfSize < obstacle.y + halfH
             ) {
-                return true; // Le joueur est bloqué par un obstacle
+                return true;
             }
         }
-        return false; // Le joueur n'est pas bloqué
-    }
-    
+        return false;
+    } 
 }
 
 class Obstacle {
@@ -490,7 +480,7 @@ function initObstacles(niveau) {
             break;
 
         case 6:
-            // Niveau 6 : Plus d'obstacles fixes, disposition plus complexe
+            //Niveau 6
             obstacles.push(new Obstacle(150, 150, 50, 100, true, ["Y",2], "purple"));//avec d'autre forme
             obstacles.push(new Obstacle(200, 300, 100, 50, true, ["X",2], "green"));
             obstacles.push(new Obstacle(400, 100, 150, 50, true, ["X",2], "red"));
@@ -499,7 +489,6 @@ function initObstacles(niveau) {
             break;
 
         case 7:
-            // Niveau 7 : Obstacles avec plus de variétés
             obstacles.push(new Obstacle(150, 0, 50, 200, true, false, "red"));
             obstacles.push(new Obstacle(350, 150, 100, 50, true, ["Y",2], "blue"));
             obstacles.push(new Obstacle(550, 300, 50, 100, true, ["Y",4], "green"));
@@ -509,7 +498,6 @@ function initObstacles(niveau) {
             break;
 
         case 8:
-            // Niveau 8 : Obstacles plus nombreux
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "green"));
             obstacles.push(new Obstacle(300, 400, 200, 20, true, ["X",3], "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 400, false, false, "red"));
@@ -519,7 +507,6 @@ function initObstacles(niveau) {
             break;
 
         case 9:
-            // Niveau 9 : Obstacles avec plus de complexité
             obstacles.push(new Obstacle(300, 50, 50, 150, true, ["X",-1.5], "purple"));
             obstacles.push(new Obstacle(200, 200, 620, 50, false, false, "yellow"));
             obstacles.push(new Obstacle(600, 350, 620, 50, false, false, "yellow"));
@@ -528,7 +515,6 @@ function initObstacles(niveau) {
             break;
 
         case 10:
-            // Niveau 10 : Obstacles larges et étroits
             obstacles.push(new Obstacle(150, 150, 300, 50, true, ["X",6], "yellow"));
             obstacles.push(new Obstacle(400, 100, 100, 50, true, ["Y",6], "blue"));
             obstacles.push(new Obstacle(200, 450, 50, 300, true, ["X",-6], "purple"));
@@ -536,7 +522,6 @@ function initObstacles(niveau) {
             break;
 
         case 11:
-            // Niveau 11 : Obstacle complexe au centre
             obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",6], "green"));
             obstacles.push(new Obstacle(50, 100, 100, 50, true, ["Y",3], "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
@@ -545,7 +530,6 @@ function initObstacles(niveau) {
             break;
 
         case 12:
-            // Niveau 12 : Mélange de petits et grands obstacles
             obstacles.push(new Obstacle(100, 100, 100, 100, true, ["X",4], "orange"));
             obstacles.push(new Obstacle(500, 200, 150, 50, true, ["X",3], "red"));
             obstacles.push(new Obstacle(100, 500, 150, 50, true, ["X",3], "pink"));
@@ -554,7 +538,6 @@ function initObstacles(niveau) {
             break;
 
         case 13:
-            // Niveau 13 : Obstacles en forme de couloirs
             obstacles.push(new Obstacle(200, 100, 400, 20, true, ["X",4], "purple"));
             obstacles.push(new Obstacle(500, 300, 300, 20, true, ["X",4], "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 630, false, false, "yellow"));
@@ -563,7 +546,6 @@ function initObstacles(niveau) {
             break;
 
         case 14:
-            // Niveau 14 : Obstacles en couloirs plus complexes
             c.choix="Y";
             c.move=true;
             obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "green"));
@@ -577,7 +559,6 @@ function initObstacles(niveau) {
             break;
 
         case 15:
-            // Niveau 15 : Obstacles plus serrés
             c.choix="X";
             c.move=true;
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "blue"));
@@ -589,7 +570,6 @@ function initObstacles(niveau) {
             break;
 
         case 16:
-            // Niveau 16 : Grand obstacle au centre
             c.move=true;
             obstacles.push(new Obstacle(400, 300, 200, 200, true, ["Y",3], "orange"));
             obstacles.push(new Obstacle(100, 150, 100, 50, true, ["X",5], "blue"));
@@ -598,7 +578,6 @@ function initObstacles(niveau) {
             break;
 
         case 17:
-            // Niveau 17 : Obstacles plus variés
             c.choix="Y"
             c.move=true;
             obstacles.push(new Obstacle(100, 100, 50, 100, true, ["X",3], "purple"));
@@ -609,7 +588,6 @@ function initObstacles(niveau) {
             break;
 
         case 18:
-            // Niveau 18 : Obstacles plus nombreux
             c.choix="Y"
             c.move=true;
             obstacles.push(new Obstacle(100, 150, 200, 50, false, false, "blue"));
@@ -622,7 +600,6 @@ function initObstacles(niveau) {
             break;
 
         case 19:
-            // Niveau 19 : Beaucoup d'obstacles étroits
             c.choix="XY"
             c.move=true;
             obstacles.push(new Obstacle(300, 100, 50, 50, true, ["X",-6], "yellow"));
@@ -637,7 +614,6 @@ function initObstacles(niveau) {
             break;
 
         case 20:
-            // Niveau 20 : Final avec obstacles nombreux et serrés
             c.choix="XY"
             c.move=true;
             obstacles.push(new Obstacle(200, 150, 50, 300, true, ["Y",3], "red"));
@@ -667,17 +643,16 @@ function afficheNiveau(niveau) {
     niveauDisplay.textContent = `Niveau : ${niveau}`;
 }
 
-function updateCountdown() {//il faut l'afficher
+function updateCountdown() {
     if (countdownValue > 0) {
         countdownValue--;
         countdownElement.textContent = countdownValue;
     } else {
-        // Optionnel : Quand le compteur atteint 0, afficher un message
-        clearInterval(countdownInterval); // Arrêter l'intervalle
-        countdownElement.textContent = "GO!"; // Afficher "GO!" ou autre
+        clearInterval(countdownInterval);
+        countdownElement.textContent = "GO!";
     }
 }
-function initialiserNiveau() {//modifier
+function initialiserNiveau() {
     players.forEach(player => {
         player.resetPosition();
         player.exit=false;
@@ -727,7 +702,7 @@ function mainLoop() {
         
         ctx.restore(); 
         setTimeout(() => {
-            // Passer au niveau suivant
+            //Passer au niveau suivant
             c.addingScore();
             niveau++;
             if (niveau > dernier_niv) {
@@ -743,7 +718,7 @@ function mainLoop() {
                     ctx.fillText(`${index + 1}. ${player.name} : ${player.score}`, w / 2, h / 2 + (index + 1) * 40);
                 });
                 ctx.restore();
-                return; // Arrêter le jeu
+                return; //Arrêter le jeu
             }
 
             //initialiser le niveau suivant
