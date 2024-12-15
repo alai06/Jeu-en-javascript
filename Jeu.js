@@ -97,39 +97,78 @@ class Player {
     checkCollisionWithPlayer(otherPlayer) {
         let halfSize = this.size / 2;
         let otherHalfSize = otherPlayer.size / 2;
-
+    
+        // Vérification de la collision entre les deux joueurs
         if (
             this.x + halfSize > otherPlayer.x - otherHalfSize &&
             this.x - halfSize < otherPlayer.x + otherHalfSize &&
             this.y + halfSize > otherPlayer.y - otherHalfSize &&
             this.y - halfSize < otherPlayer.y + otherHalfSize
         ) {
-            //detecter les directions de déplacement et repousser les joueurs
-            if (keys[this.control.right] && this.x < otherPlayer.x && otherPlayer.x < w - otherHalfSize) {
-                let overlapX = (this.x + halfSize) - (otherPlayer.x - otherHalfSize);
-                this.x -= Math.min(overlapX, this.speed);
-                otherPlayer.x += Math.min(overlapX, this.speed);
+            // Si le joueur se déplace vers la droite
+            if (keys[this.control.right] && this.x < otherPlayer.x) {
+                // Vérifier si otherPlayer est bloqué par un obstacle ou un rebord
+                if (otherPlayer.x + otherHalfSize >= w || this.isBlockedByObstacle()) {
+                    this.x -= this.speed; // J1 s'arrête car J2 est bloqué
+                } else {
+                    let overlapX = (this.x + halfSize) - (otherPlayer.x - otherHalfSize);
+                    this.x -= Math.min(overlapX, this.speed);
+                    otherPlayer.x += Math.min(overlapX, this.speed);
+                }
             }
-
-            if (keys[this.control.left] && this.x > otherPlayer.x && otherPlayer.x > otherHalfSize) {
-                let overlapX = (otherPlayer.x + otherHalfSize) - (this.x - halfSize);
-                this.x += Math.min(overlapX, this.speed);
-                otherPlayer.x -= Math.min(overlapX, this.speed);
+    
+            // Si le joueur se déplace vers la gauche
+            if (keys[this.control.left] && this.x > otherPlayer.x) {
+                if (otherPlayer.x - otherHalfSize <= 0 || this.isBlockedByObstacle()) {
+                    this.x += this.speed; // J1 s'arrête car J2 est bloqué
+                } else {
+                    let overlapX = (otherPlayer.x + otherHalfSize) - (this.x - halfSize);
+                    this.x += Math.min(overlapX, this.speed);
+                    otherPlayer.x -= Math.min(overlapX, this.speed);
+                }
             }
-
-            if (keys[this.control.down] && this.y < otherPlayer.y && otherPlayer.y < h - otherHalfSize) {
-                let overlapY = (this.y + halfSize) - (otherPlayer.y - otherHalfSize);
-                this.y -= Math.min(overlapY, this.speed);
-                otherPlayer.y += Math.min(overlapY, this.speed);
+    
+            // Si le joueur se déplace vers le bas
+            if (keys[this.control.down] && this.y < otherPlayer.y) {
+                if (otherPlayer.y + otherHalfSize >= h || this.isBlockedByObstacle()) {
+                    this.y -= this.speed; // J1 s'arrête car J2 est bloqué
+                } else {
+                    let overlapY = (this.y + halfSize) - (otherPlayer.y - otherHalfSize);
+                    this.y -= Math.min(overlapY, this.speed);
+                    otherPlayer.y += Math.min(overlapY, this.speed);
+                }
             }
-
-            if (keys[this.control.up] && this.y > otherPlayer.y && otherPlayer.y > otherHalfSize) {
-                let overlapY = (otherPlayer.y + otherHalfSize) - (this.y - halfSize);
-                this.y += Math.min(overlapY, this.speed);
-                otherPlayer.y -= Math.min(overlapY, this.speed);
+    
+            // Si le joueur se déplace vers le haut
+            if (keys[this.control.up] && this.y > otherPlayer.y) {
+                if (otherPlayer.y - otherHalfSize <= 0 || this.isBlockedByObstacle()) {
+                    this.y += this.speed;
+                } else {
+                    let overlapY = (otherPlayer.y + otherHalfSize) - (this.y - halfSize);
+                    this.y += Math.min(overlapY, this.speed);
+                    otherPlayer.y -= Math.min(overlapY, this.speed);
+                }
             }
         }
     }
+    isBlockedByObstacle() {
+        for (let obstacle of obstacles) {
+            let halfW = obstacle.w / 2;
+            let halfH = obstacle.h / 2;
+            let playerHalfSize = this.size / 2;
+
+            if (
+                this.x + playerHalfSize > obstacle.x - halfW &&
+                this.x - playerHalfSize < obstacle.x + halfW &&
+                this.y + playerHalfSize > obstacle.y - halfH &&
+                this.y - playerHalfSize < obstacle.y + halfH
+            ) {
+                return true; // Le joueur est bloqué par un obstacle
+            }
+        }
+        return false; // Le joueur n'est pas bloqué
+    }
+    
 }
 
 class Obstacle {
