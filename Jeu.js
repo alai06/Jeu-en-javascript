@@ -689,6 +689,7 @@ function mainLoop() {
         ctx.restore(); 
         setTimeout(() => {
             // Passer au niveau suivant
+            c.addingScore();
             niveau++;
             if (niveau > dernier_niv) {
                 ctx.clearRect(0, 0, w, h);
@@ -700,14 +701,13 @@ function mainLoop() {
 
                 const sortedPlayers = players.slice().sort((a, b) => b.score - a.score);
                 sortedPlayers.forEach((player, index) => {
-                    ctx.fillText(`${index + 1}. ${player.name} : ${player.score}`, w / 2, h / 2 + (index + 1) * 30);
+                    ctx.fillText(`${index + 1}. ${player.name} : ${player.score}`, w / 2, h / 2 + (index + 1) * 40);
                 });
                 ctx.restore();
                 return; // Arrêter le jeu
             }
 
             //initialiser le niveau suivant
-            c.addingScore();
             initialiserNiveau();
             c.resetForNextLevel();
             initObstacles(niveau); //charger les obstacles pour le niveau suivant
