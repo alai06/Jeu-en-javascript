@@ -1,4 +1,3 @@
-
 var canvas, ctx, w, h;
 var obstacles = [];
 var players=[];
@@ -76,7 +75,6 @@ class Player {
                 this.y -= this.speed;
             }
         }
-        
     }
     resetPosition() {
         this.x = this.initialX;
@@ -188,8 +186,7 @@ class Obstacle {
                 });
             }
         }
-    }
-    
+    }  
     draw(){
         drawRect(this.x, this.y, this.w, this.h, this.color);
     }
@@ -261,9 +258,9 @@ class ExitGate{
                 pointmax--;
             }
         }
-        /*players.forEach((player, index) => {
+        players.forEach((player, index) => {
             document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-        });*/
+        });
     }
     resetForNextLevel() {
         this.Listeplayers=[];
