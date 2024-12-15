@@ -260,9 +260,9 @@ class ExitGate{
                 pointmax--;
             }
         }
-        /*players.forEach((player, index) => {
+        players.forEach((player, index) => {
             document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-        });*/
+        });
     }
     resetForNextLevel() {
         this.Listeplayers=[];
