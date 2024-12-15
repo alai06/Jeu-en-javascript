@@ -1,3 +1,4 @@
+
 var canvas, ctx, w, h;
 var obstacles = [];
 var players=[];
@@ -260,9 +261,9 @@ class ExitGate{
                 pointmax--;
             }
         }
-        players.forEach((player, index) => {
+        /*players.forEach((player, index) => {
             document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-        });
+        });*/
     }
     resetForNextLevel() {
         this.Listeplayers=[];
@@ -389,68 +390,6 @@ document.addEventListener('DOMContentLoaded', function () {
     cancelAnimationFrame(mainLoop);  
 });  ///ne marche pas */ 
 
-document.addEventListener('DOMContentLoaded', function () {
-    const menu = document.getElementById('menu');
-    const game = document.getElementById('game');
-    const playersSelect = document.getElementById('players');
-    const playerColorsDiv = document.getElementById('playerColors');
-    const startGameButton = document.getElementById('startGame');
-    
-    //Fonction pour générer les couleurs pour chaque joueur
-    function generatePlayerColorOptions(numPlayers) {
-        playerColorsDiv.innerHTML = ''; //On efface les anciennes options
-        const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
-        for (let i = 1; i <= numPlayers; i++) {
-            const label = document.createElement('label');
-            label.innerText = `Couleur du Joueur ${i}: `;
-            
-            const input = document.createElement('input');
-            input.type = 'color';
-            input.id = `colorPlayer${i}`;
-            input.name = `colorPlayer${i}`;
-            input.value = predefinedColors[i - 1];//Attribuer la couleur définie
-            
-            playerColorsDiv.appendChild(label);
-            playerColorsDiv.appendChild(input);
-            playerColorsDiv.appendChild(document.createElement('br'));
-        }
-    }
-
-    //Événement lorsque le nombre de joueurs est changé
-    playersSelect.addEventListener('change', function () {
-        generatePlayerColorOptions(playersSelect.value);
-    });
-
-    //Initialiser avec 1 joueur par défaut
-    generatePlayerColorOptions(playersSelect.value);
-
-    //Quand le bouton 'Commencer le jeu' est cliqué
-    startGameButton.addEventListener('click', function () {
-        //Récupérer les informations des joueurs
-        const numPlayers = playersSelect.value;
-        const playerColors = [];
-        for (let i = 1; i <= numPlayers; i++) {
-            const colorInput = document.getElementById(`colorPlayer${i}`);
-            playerColors.push(colorInput.value);
-        }
-
-        //Cacher le menu et afficher le jeu
-        menu.style.display = 'none';
-        game.style.display = 'block';
-        
-        initGame(numPlayers, playerColors);
-    });
-
-    //Fonction pour initialiser le jeu avec les info des joueurs
-    function initGame(numPlayers, playerColors) {
-        for (let i = 0; i < numPlayers; i++) {
-            players.push(new Player(i + 1, `Joueur ${i + 1}`, 20+ i * 30, 20 , playerColors[i]));
-        }
-        
-        c = new ExitGate(w/2,h/2,25);
-        mainLoop();
-    }
-});
 
 function drawRect(x, y, width, height, c) {
     ctx.save();
