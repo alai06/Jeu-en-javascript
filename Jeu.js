@@ -358,22 +358,22 @@ window.onload = function init() {
 
 function afficherCompteur_d(callback) {
     const countdownElement = document.getElementById('countdown');
-    let countdownValue = 5; // Démarre à 5
-    countdownElement.style.display = 'block'; // Affiche l'élément du décompte
+    let countdownValue = 5;//Démarre à 5
+    countdownElement.style.display = 'block';//Affiche l'élément du décompte
 
     const countdownInterval = setInterval(() => {
         if (countdownValue > 0) {
-            countdownElement.textContent = countdownValue; // Affiche le chiffre
-            countdownValue--; // Décrémenter le chiffre
+            countdownElement.textContent = countdownValue;//Affiche le chiffre
+            countdownValue--; //Décrémenter le chiffre
         } else {
-            countdownElement.textContent = "GO!"; // Affiche "GO!" à la fin du décompte
-            clearInterval(countdownInterval); // Arrêter le décompte
+            countdownElement.textContent = "GO!";//Affiche "GO!" à la fin du décompte
+            clearInterval(countdownInterval);//Arrêter le décompte
             setTimeout(() => {
-                countdownElement.style.display = 'none'; // Cache le décompte après 1 seconde
-                if (callback) callback(); // Appel du callback pour démarrer le jeu
+                countdownElement.style.display = 'none';
+                if (callback) callback();
             }, 1000);
         }
-    }, 1000); // Intervalle de 1 seconde
+    }, 1000);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const startGameButton = document.getElementById('startGame');
     const exitButton = document.getElementById('ExitButton');
 
-    // Fonction pour générer les options de couleur des joueurs
+    //Fonction pour générer les options de couleur des joueurs
     function generatePlayerColorOptions(numPlayers) {
         playerColorsDiv.innerHTML = ''; 
         const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     generatePlayerColorOptions(playersSelect.value);
 
-    // Démarrage du jeu après le compte à rebours
+    //Démarrage du jeu après le compte à rebours
     startGameButton.addEventListener('click', function () {
         const numPlayers = playersSelect.value;
         const playerColors = [];
@@ -422,12 +422,12 @@ document.addEventListener('DOMContentLoaded', function () {
         menu.style.display = 'none';
         game.style.display = 'block';
 
-        // Affiche le compte à rebours et lance le jeu après
-        afficherCompteur_d(() => initGame(numPlayers, playerColors)); // Démarrez après le compte à rebours
+        //Affiche le compte à rebours et lance le jeu après
+        afficherCompteur_d(() => initGame(numPlayers, playerColors));//Démarrez après le compte à rebours
         exitButton.style.display = 'block';
     });
 
-    // Fonction pour initialiser le jeu
+    //Fonction pour initialiser le jeu
     function initGame(numPlayers, playerColors) {
         players = [];
         for (let i = 0; i < numPlayers; i++) {
@@ -467,14 +467,12 @@ function initObstacles(niveau) {
         case 1:
             break;
         case 2:
-            // Niveau 2 : Deux obstacles simples
             obstacles.push(new Obstacle(150, 0, 10, 1000, false, false, "red"));
             obstacles.push(new Obstacle(500, 600, 10, 1000, false, false, "green"));
             c.modifyCoordExitGate(600, 600);
             break;
 
         case 3:
-            // Niveau 3 : Trois obstacles fixes
             obstacles.push(new Obstacle(150, 0, 10, 1000, false, false, "red"));
             obstacles.push(new Obstacle(500, 600, 10, 1000, false, false, "green"));
             obstacles.push(new Obstacle(150, 600, 10, 100, false, false, "red"));
@@ -484,7 +482,6 @@ function initObstacles(niveau) {
             break;
 
         case 4:
-            // Niveau 4 : Obstacles plus larges et différents
             obstacles.push(new Obstacle(250, 0, 50, 400, false, false, "blue"));
             obstacles.push(new Obstacle(500, 0, 50, 400, false, false, "blue"));
             obstacles.push(new Obstacle(0, 300, 600, 20, false, false, "red"));
@@ -496,7 +493,6 @@ function initObstacles(niveau) {
             break;
 
         case 5:
-            // Niveau 5 : Quatre obstacles
             obstacles.push(new Obstacle(150, 0, 50, 350, false, false, "orange"));
             obstacles.push(new Obstacle(300, 200, 100, 50, true, ["X",2], "red"));
             obstacles.push(new Obstacle(450, 350, 50, 100, true, ["Y",2], "green"));
@@ -505,8 +501,7 @@ function initObstacles(niveau) {
             break;
 
         case 6:
-            // Niveau 6 : Plus d'obstacles fixes, disposition plus complexe
-            obstacles.push(new Obstacle(150, 150, 50, 100, true, ["Y",2], "purple"));//avec d'autre forme
+            obstacles.push(new Obstacle(150, 150, 50, 100, true, ["Y",2], "purple"));
             obstacles.push(new Obstacle(200, 300, 100, 50, true, ["X",2], "green"));
             obstacles.push(new Obstacle(400, 100, 150, 50, true, ["X",2], "red"));
             obstacles.push(new Obstacle(550, 400, 50, 150, true, ["Y",2], "yellow"));
@@ -514,7 +509,6 @@ function initObstacles(niveau) {
             break;
 
         case 7:
-            // Niveau 7 : Obstacles avec plus de variétés
             obstacles.push(new Obstacle(150, 0, 50, 200, true, false, "red"));
             obstacles.push(new Obstacle(350, 150, 100, 50, true, ["Y",2], "blue"));
             obstacles.push(new Obstacle(550, 300, 50, 100, true, ["Y",4], "green"));
@@ -524,7 +518,6 @@ function initObstacles(niveau) {
             break;
 
         case 8:
-            // Niveau 8 : Obstacles plus nombreux
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "green"));
             obstacles.push(new Obstacle(300, 400, 200, 20, true, ["X",3], "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 400, false, false, "red"));
@@ -534,7 +527,6 @@ function initObstacles(niveau) {
             break;
 
         case 9:
-            // Niveau 9 : Obstacles avec plus de complexité
             obstacles.push(new Obstacle(300, 50, 50, 150, true, ["X",-1.5], "purple"));
             obstacles.push(new Obstacle(200, 200, 620, 50, false, false, "yellow"));
             obstacles.push(new Obstacle(600, 350, 620, 50, false, false, "yellow"));
@@ -543,7 +535,6 @@ function initObstacles(niveau) {
             break;
 
         case 10:
-            // Niveau 10 : Obstacles larges et étroits
             obstacles.push(new Obstacle(150, 150, 300, 50, true, ["X",6], "yellow"));
             obstacles.push(new Obstacle(400, 100, 100, 50, true, ["Y",6], "blue"));
             obstacles.push(new Obstacle(200, 350, 50, 150, true, ["X",6], "purple"));
@@ -551,7 +542,6 @@ function initObstacles(niveau) {
             break;
 
         case 11:
-            // Niveau 11 : Obstacle complexe au centre
             obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",6], "green"));
             obstacles.push(new Obstacle(100, 100, 100, 50, true, ["Y",3], "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
@@ -560,7 +550,6 @@ function initObstacles(niveau) {
             break;
 
         case 12:
-            // Niveau 12 : Mélange de petits et grands obstacles
             obstacles.push(new Obstacle(100, 100, 100, 100, true, ["X",4], "orange"));
             obstacles.push(new Obstacle(500, 200, 150, 50, true, ["X",3], "red"));
             obstacles.push(new Obstacle(100, 500, 150, 50, true, ["X",3], "pink"));
@@ -569,7 +558,6 @@ function initObstacles(niveau) {
             break;
 
         case 13:
-            // Niveau 13 : Obstacles en forme de couloirs
             obstacles.push(new Obstacle(200, 100, 400, 20, true, ["X",4], "purple"));
             obstacles.push(new Obstacle(500, 300, 300, 20, true, ["X",4], "blue"));
             obstacles.push(new Obstacle(500, 100, 20, 630, false, false, "yellow"));
@@ -578,7 +566,6 @@ function initObstacles(niveau) {
             break;
 
         case 14:
-            // Niveau 14 : Obstacles en couloirs plus complexes
             c.choix="Y";
             c.move=true;
             obstacles.push(new Obstacle(150, 100, 50, 300, false, false, "green"));
@@ -592,7 +579,6 @@ function initObstacles(niveau) {
             break;
 
         case 15:
-            // Niveau 15 : Obstacles plus serrés
             c.choix="X";
             c.move=true;
             obstacles.push(new Obstacle(100, 200, 200, 20, false, false, "blue"));
@@ -604,7 +590,6 @@ function initObstacles(niveau) {
             break;
 
         case 16:
-            // Niveau 16 : Grand obstacle au centre
             c.move=true;
             obstacles.push(new Obstacle(400, 300, 200, 200, true, ["Y",3], "orange"));
             obstacles.push(new Obstacle(100, 150, 100, 50, true, ["X",5], "blue"));
@@ -613,7 +598,6 @@ function initObstacles(niveau) {
             break;
 
         case 17:
-            // Niveau 17 : Obstacles plus variés
             c.choix="Y"
             c.move=true;
             obstacles.push(new Obstacle(100, 100, 50, 100, true, ["X",3], "purple"));
@@ -624,7 +608,6 @@ function initObstacles(niveau) {
             break;
 
         case 18:
-            // Niveau 18 : Obstacles plus nombreux
             c.choix="Y"
             c.move=true;
             obstacles.push(new Obstacle(100, 150, 200, 50, false, false, "blue"));
@@ -637,7 +620,6 @@ function initObstacles(niveau) {
             break;
 
         case 19:
-            // Niveau 19 : Beaucoup d'obstacles étroits
             c.choix="XY"
             c.move=true;
             obstacles.push(new Obstacle(300, 100, 50, 50, true, ["X",-6], "yellow"));
@@ -652,7 +634,6 @@ function initObstacles(niveau) {
             break;
 
         case 20:
-            // Niveau 20 : Final avec obstacles nombreux et serrés
             c.choix="XY"
             c.move=true;
             obstacles.push(new Obstacle(200, 150, 50, 300, true, ["Y",3], "red"));
@@ -677,13 +658,13 @@ function initObstacles(niveau) {
 
 
 function afficheNiveau(niveau) {
-    // Sélectionner l'élément HTML où afficher le niveau
+    //Sélectionner l'élément HTML où afficher le niveau
     const niveauDisplay = document.getElementById("niveauDisplay");
-    // Mettre à jour son contenu avec le niveau
+    //Mettre à jour son contenu avec le niveau
     niveauDisplay.textContent = `Niveau : ${niveau}`;
 }
 
-// Fonction qui initialise le niveau (reset des joueurs et obstacles)
+//Fonction qui initialise le niveau (reset des joueurs et obstacles)
 function initialiserNiveau() {
     players.forEach(player => {
         player.resetPosition();
@@ -722,7 +703,7 @@ function commencerNiveau() {
     c.resetForNextLevel();
     initObstacles(niveau); 
     requestAnimationFrame(mainLoop);
-    afficher_timer(niveau); // Démarrer le timer pour ce niveau
+    afficher_timer(niveau);
 }
 
 function afficherCompteur() {
@@ -740,7 +721,7 @@ function afficherCompteur() {
             clearInterval(countdownInterval);
             setTimeout(() => {
                 countdownElement.style.display = 'none';
-                commencerNiveau(); // Démarrer le niveau après le compte à rebours
+                commencerNiveau();
             }, 1000);
         }
     }, 1000);
@@ -785,7 +766,7 @@ function mainLoop() {
         ctx.restore();
 
         setTimeout(() => {
-            // Passer au niveau suivant
+            //Passer au niveau suivant
             niveau++;
             if (niveau > dernier_niv) {
                 console.log("Félicitations, vous avez terminé le jeu !");
@@ -796,15 +777,11 @@ function mainLoop() {
                 ctx.textAlign = "center";
                 ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2);
                 ctx.restore();
-                return; // Arrêter le jeu
+                return;
             }
-
-            // Initialiser le niveau suivant et lancer le décompte
             afficherCompteur();
-        }, 2000); // Pause de 2 secondes avant le prochain niveau
-        return; // Suspendre la boucle principale temporairement
+        }, 2000);
+        return;
     }
     requestAnimationFrame(mainLoop);
 }
-
-
