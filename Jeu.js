@@ -35,12 +35,14 @@ class Player {
         this.exit=false;
         this.initialX=this.x;
         this.initialY=this.y;
+        this.posXlv1=this.x;
+        this.posYlv1=this.y;
+        this.death=0;//abandon
     }
     draw(){
         if(!this.exit){
         drawRect(this.x, this.y, this.size, this.size, this.color);}
     }
-
     updatePlayer() {
         if(this.exit){return;}
         let halfSize = this.size / 2;
@@ -75,17 +77,22 @@ class Player {
                 this.y -= this.speed;
             }
         }
-        
     }
     resetPosition() {
-        this.x = this.initialX;
-        this.y = this.initialY;
+        if(niveau===1){
+            this.x=this.posXlv1;
+            this.y = this.posYlv1;
+        }
+        else{
+            this.x = this.initialX;
+            this.y = this.initialY;
+        } 
     }
     BornAgain(){
         setTimeout(() => {
             this.x = this.initialX;
             this.y = this.initialY;
-        }, 160);
+        }, 120);
     }
     checkCollisionWithPlayer(otherPlayer) {
         let halfSize = this.size / 2;
@@ -188,7 +195,6 @@ class Obstacle {
             }
         }
     }
-    
     draw(){
         drawRect(this.x, this.y, this.w, this.h, this.color);
     }
@@ -249,16 +255,20 @@ class ExitGate{
             if (this.Listeplayers.length === players.length) {
                 checkcol = true;
             }
+        }
+    }
+    addingScore(){
+        if(players.length===1){players[0].score+=1;}
+        else{
             var pointmax =3;
-            if(players.length===1){players[0].score+=1;}
-            else{
-                for(let i=0;i<this.Listeplayers.length;i++){
-                    this.Listeplayers[i].score=pointmax;
-                    pointmax--;
-                    //console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
-                }
+            for(let i=0;i<this.Listeplayers.length;i++){
+                this.Listeplayers[i].score+=pointmax;
+                pointmax--;
             }
         }
+        players.forEach((player, index) => {
+            document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
+        });
     }
     resetForNextLevel() {
         this.Listeplayers=[];
@@ -321,10 +331,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const playersSelect = document.getElementById('players');
     const playerColorsDiv = document.getElementById('playerColors');
     const startGameButton = document.getElementById('startGame');
-    
-    //Fonction pour générer les couleurs pour chaque joueur
-    function generatePlayerColorOptions(numPlayers) {
-        playerColorsDiv.innerHTML = ''; //On efface les anciennes options
+    const exitButton = document.getElementById('ExitButton'); 
+        function generatePlayerColorOptions(numPlayers) {
+        playerColorsDiv.innerHTML = ''; 
         const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
         for (let i = 1; i <= numPlayers; i++) {
             const label = document.createElement('label');
@@ -334,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = 'color';
             input.id = `colorPlayer${i}`;
             input.name = `colorPlayer${i}`;
-            input.value = predefinedColors[i - 1];//Attribuer la couleur définie
+            input.value = predefinedColors[i - 1];
             
             playerColorsDiv.appendChild(label);
             playerColorsDiv.appendChild(input);
@@ -342,17 +351,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    //Événement lorsque le nombre de joueurs est changé
     playersSelect.addEventListener('change', function () {
         generatePlayerColorOptions(playersSelect.value);
     });
 
-    //Initialiser avec 1 joueur par défaut
     generatePlayerColorOptions(playersSelect.value);
-
-    //Quand le bouton 'Commencer le jeu' est cliqué
     startGameButton.addEventListener('click', function () {
-        //Récupérer les informations des joueurs
         const numPlayers = playersSelect.value;
         const playerColors = [];
         for (let i = 1; i <= numPlayers; i++) {
@@ -360,22 +364,40 @@ document.addEventListener('DOMContentLoaded', function () {
             playerColors.push(colorInput.value);
         }
 
-        //Cacher le menu et afficher le jeu
         menu.style.display = 'none';
         game.style.display = 'block';
         
         initGame(numPlayers, playerColors);
+
+        exitButton.style.display = 'block';
     });
 
-    //Fonction pour initialiser le jeu avec les info des joueurs
     function initGame(numPlayers, playerColors) {
-        for (let i = 0; i < numPlayers; i++) {
-            players.push(new Player(i + 1, `Joueur ${i + 1}`, 20+ i * 30, 20 , playerColors[i]));
-        }
         
-        c = new ExitGate(w/2,h/2,25);
+        players = [];  
+        for (let i = 0; i < numPlayers; i++) {
+            players.push(new Player(i + 1, `Joueur ${i + 1}`, 20 + i * 30, 20, playerColors[i]));
+            const scoreElement = document.getElementById(`scorePlayer${i + 1}`);
+            if(players.length>=2){
+                players[1].posXlv1=w-20;
+                players[1].posYlv1=20;
+                console.log(players[1].id);
+            }
+            if(players.length>=3){
+                players[2].posXlv1=20;
+                players[2].posYlv1=h-20;
+            }
+            if(players.length>=4){
+                players[3].posXlv1=w-20;
+                players[3].posYlv1=h-20;
+            }
+            scoreElement.style.display="block";
+        }
+        initialiserNiveau();
+        c = new ExitGate(w / 2, h / 2, 25);  
         mainLoop();
     }
+
 });
 
 function drawRect(x, y, width, height, c) {
@@ -383,42 +405,6 @@ function drawRect(x, y, width, height, c) {
     ctx.fillStyle = c;
     ctx.fillRect(x-1/2*width, y-1/2*height, width, height);
     ctx.restore();
-}
-
-function Menu(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("Course Cube", w / 2, h / 2 - 50);
-    ctx.restore();
-
-    const startButton = document.getElementById("StartButton");
-    const exitButton = document.getElementById("ExitButton");
-    startButton.style.display = "block";
-    exitButton.style.display = "block";
-
-    startButton.addEventListener("click", function() {
-        ingame=true;
-        mainLoop();
-        
-    });
-    exitButton.addEventListener("click", function() {
-        ingame=false;
-        exitgame();
-    });
-}
-
-function exitgame(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("C fini", w / 2, h / 2 - 50);
-    ctx.restore();
-    cancelAnimationFrame(mainLoop);//inutile
 }
 
 function initObstacles(niveau) {
@@ -506,14 +492,14 @@ function initObstacles(niveau) {
             // Niveau 10 : Obstacles larges et étroits
             obstacles.push(new Obstacle(150, 150, 300, 50, true, ["X",6], "yellow"));
             obstacles.push(new Obstacle(400, 100, 100, 50, true, ["Y",6], "blue"));
-            obstacles.push(new Obstacle(200, 350, 50, 150, true, ["X",6], "purple"));
+            obstacles.push(new Obstacle(200, 450, 50, 300, true, ["X",-6], "purple"));
             c.modifyCoordExitGate(600, 500);
             break;
 
         case 11:
             // Niveau 11 : Obstacle complexe au centre
             obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",6], "green"));
-            obstacles.push(new Obstacle(100, 100, 100, 50, true, ["Y",3], "blue"));
+            obstacles.push(new Obstacle(50, 100, 100, 50, true, ["Y",3], "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
             obstacles.push(new Obstacle(300, 600, 100, 100, true, ["X",3], "red"));
             c.modifyCoordExitGate(50, 600);
@@ -621,9 +607,9 @@ function initObstacles(niveau) {
             obstacles.push(new Obstacle(600, 400, 50, 150, true, ["Y",-3], "yellow"));
             obstacles.push(new Obstacle(300, 100, 50, 50, true, ["X",-6], "yellow"));
             obstacles.push(new Obstacle(100, 200, 100, 100, true, ["X",3], "red"));
-            obstacles.push(new Obstacle(500, 100, 50, 50, true, ["Y",-3], "green"));
+            obstacles.push(new Obstacle(50, 400, 100, 100, true, ["Y",-3], "green"));
 
-            obstacles.push(new Obstacle(300, 200, 50, 50, true, ["Y",-3], "yellow"));
+            obstacles.push(new Obstacle(700, 200, 50, 50, true, ["Y",-3], "yellow"));
             obstacles.push(new Obstacle(600, 600, 100, 100, true, ["X",-3], "purple"));
             obstacles.push(new Obstacle(400, 400, 100, 100, true, ["X",-4], "blue"));
             c.modifyCoordExitGate(560, 600);
@@ -635,12 +621,11 @@ function initObstacles(niveau) {
     }
 }
 
-function afficheNiveau(niveau) {//inutile
-    ctx.save();
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "blue";
-    ctx.fillText(`Niveau : ${niveau}`, 10, 30);
-    ctx.restore();
+function afficheNiveau(niveau) {
+    // Sélectionner l'élément HTML où afficher le niveau
+    const niveauDisplay = document.getElementById("niveauDisplay");
+    // Mettre à jour son contenu avec le niveau
+    niveauDisplay.textContent = `Niveau : ${niveau}`;
 }
 
 function updateCountdown() {//il faut l'afficher
@@ -689,32 +674,40 @@ function mainLoop() {
         obstacle.draw();
         players.forEach(player => obstacle.checkCollision(player));
     });
-    
     if (checkcol) {
         ctx.save();
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "blue";
+        ctx.font = "bold 40px 'Press Start 2P', Roboto"; 
+        ctx.fillStyle = "#00ffcc";
         ctx.textAlign = "center";
+        ctx.shadowColor = "black";
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 4;
+        ctx.shadowBlur = 5;
         ctx.fillText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
-        ctx.restore();
-
+        ctx.strokeText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
+        
+        ctx.restore(); 
         setTimeout(() => {
-            //passer au niveau suivant
+            // Passer au niveau suivant
+            c.addingScore();
             niveau++;
             if (niveau > dernier_niv) {
-                console.log("Félicitations, vous avez terminé le jeu !");
                 ctx.clearRect(0, 0, w, h);
                 ctx.save();
-                ctx.font = "40px Arial";
+                ctx.font = "40px Roboto";
                 ctx.fillStyle = "green";
                 ctx.textAlign = "center";
-                ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2);
+                ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2-40);
+
+                const sortedPlayers = players.slice().sort((a, b) => b.score - a.score);
+                sortedPlayers.forEach((player, index) => {
+                    ctx.fillText(`${index + 1}. ${player.name} : ${player.score}`, w / 2, h / 2 + (index + 1) * 40);
+                });
                 ctx.restore();
-                return; //arrêter le jeu
+                return; // Arrêter le jeu
             }
 
             //initialiser le niveau suivant
-            
             initialiserNiveau();
             c.resetForNextLevel();
             initObstacles(niveau); //charger les obstacles pour le niveau suivant
