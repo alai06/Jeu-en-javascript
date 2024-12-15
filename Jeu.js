@@ -3,7 +3,7 @@ var obstacles = [];
 var players=[];
 var keys = {}; //Suivi des touches pressées
 var win = 0; //Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=1;
+var niveau=19;
 var dernier_niv=20;
 var c;
 var ingame;
@@ -37,13 +37,12 @@ class Player {
         this.initialY=this.y;
         this.posXlv1=this.x;
         this.posYlv1=this.y;
-        this.death=0;
+        this.death=0;//abandon
     }
     draw(){
         if(!this.exit){
         drawRect(this.x, this.y, this.size, this.size, this.color);}
     }
-
     updatePlayer() {
         if(this.exit){return;}
         let halfSize = this.size / 2;
@@ -87,8 +86,7 @@ class Player {
         else{
             this.x = this.initialX;
             this.y = this.initialY;
-        }
-        
+        } 
     }
     BornAgain(){
         setTimeout(() => {
@@ -196,8 +194,7 @@ class Obstacle {
                 });
             }
         }
-    }    
-    }  
+    }
     draw(){
         drawRect(this.x, this.y, this.w, this.h, this.color);
     }
@@ -270,9 +267,7 @@ class ExitGate{
             }
         }
         players.forEach((player, index) => {
-        players.forEach((player, index) => {
             document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
-        });
         });
     }
     resetForNextLevel() {
@@ -405,15 +400,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-/*exitButton.addEventListener('click', function () {
-    game.style.display = 'none';
-    menu.style.display = 'block';
-    exitButton.style.display = 'none';
-    ingame = false;  
-    cancelAnimationFrame(mainLoop);  
-});  ///ne marche pas */ 
-
-
 function drawRect(x, y, width, height, c) {
     ctx.save();
     ctx.fillStyle = c;
@@ -513,7 +499,7 @@ function initObstacles(niveau) {
         case 11:
             // Niveau 11 : Obstacle complexe au centre
             obstacles.push(new Obstacle(300, 300, 200, 200, true, ["X",6], "green"));
-            obstacles.push(new Obstacle(100, 100, 100, 50, true, ["Y",3], "blue"));
+            obstacles.push(new Obstacle(50, 100, 100, 50, true, ["Y",3], "blue"));
             obstacles.push(new Obstacle(500, 50, 100, 50, true, ["X",3], "red"));
             obstacles.push(new Obstacle(300, 600, 100, 100, true, ["X",3], "red"));
             c.modifyCoordExitGate(50, 600);
@@ -705,13 +691,17 @@ function mainLoop() {
             // Passer au niveau suivant
             niveau++;
             if (niveau > dernier_niv) {
-                console.log("Félicitations, vous avez terminé le jeu !");
                 ctx.clearRect(0, 0, w, h);
                 ctx.save();
                 ctx.font = "40px Roboto";
                 ctx.fillStyle = "green";
                 ctx.textAlign = "center";
-                ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2);
+                ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2-40);
+
+                const sortedPlayers = players.slice().sort((a, b) => b.score - a.score);
+                sortedPlayers.forEach((player, index) => {
+                    ctx.fillText(`${index + 1}. ${player.name} : ${player.score}`, w / 2, h / 2 + (index + 1) * 30);
+                });
                 ctx.restore();
                 return; // Arrêter le jeu
             }
