@@ -33,6 +33,8 @@ class Player {
         this.exit=false;
         this.initialX=this.x;
         this.initialY=this.y;
+        this.posXlv1=this.x;
+        this.posYlv1=this.y;
     }
     draw(){
         if(!this.exit){
@@ -76,8 +78,14 @@ class Player {
         
     }
     resetPosition() {
-        this.x = this.initialX;
-        this.y = this.initialY;
+        if(niveau===1){
+            this.x=this.posXlv1;
+            this.y = this.posYlv1;
+        }
+        else{
+            this.x = this.initialX;
+            this.y = this.initialY;
+        }
     }
     BornAgain(){
         setTimeout(() => {
@@ -425,8 +433,20 @@ document.addEventListener('DOMContentLoaded', function () {
             players.push(new Player(i + 1, `Joueur ${i + 1}`, 20 + i * 30, 20, playerColors[i]));
             const scoreElement = document.getElementById(`scorePlayer${i + 1}`);
             scoreElement.style.display = "block";
+            if(players.length>=2){
+                players[1].posXlv1=w-20;
+                players[1].posYlv1=20;
+            }
+            if(players.length>=3){
+                players[2].posXlv1=20;
+                players[2].posYlv1=h-20;
+            }
+            if(players.length>=4){
+                players[3].posXlv1=w-20;
+                players[3].posYlv1=h-20;
+            }
         }
-
+        initialiserNiveau();
         c = new ExitGate(w / 2, h / 2, 25);
         mainLoop();
     }
