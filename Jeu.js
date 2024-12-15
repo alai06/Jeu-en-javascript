@@ -774,12 +774,12 @@ function mainLoop() {
     if (checkcol) {
         ctx.save();
         ctx.font = "bold 40px 'Press Start 2P', Roboto";
-        ctx.fillStyle = "#00ffcc";
+        ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.shadowColor = "black";
-        ctx.shadowOffsetX = 4;
-        ctx.shadowOffsetY = 4;
-        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 10;
+        ctx.shadowOffsetY = 10;
+        ctx.shadowBlur = 150;
         ctx.fillText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
         ctx.strokeText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
         ctx.restore();
