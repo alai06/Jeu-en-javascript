@@ -7,6 +7,7 @@ var niveau=1;
 var dernier_niv=20;
 var c;
 var ingame;
+var timerValue;
 var checkcol=false;//variable pour detecter une collision
 var count=0;
 const countdownElement = document.getElementById('countdown'); // Ajoutez cet élément HTML dans votre page
@@ -287,7 +288,9 @@ class ExitGate{
         }
     }
     addingScore(){
-        if(players.length===1){players[0].score+=1;}
+        if(players.length===1){
+            if(this.Listeplayers.length===players.length){players[0].score+=1;}
+        }
         else{
             var pointmax =3;
             for(let i=0;i<this.Listeplayers.length;i++){
@@ -691,42 +694,60 @@ function initialiserNiveau() {
     checkcol = false;
 }
 
-// Fonction pour afficher le décompte
+function afficher_timer(niveau) {
+    const timerElement = document.getElementById('timer');
+    let timerValue = (niveau >= 20) ? 60 : 30;
+
+    timerElement.style.display = 'block';
+    timerElement.textContent = `Temps restant: ${timerValue}s`;
+
+    const timerInterval = setInterval(() => {
+        if (checkcol) {
+            timerElement.textContent = "Tous les joueurs ont terminé le niveau!";
+            clearInterval(timerInterval);
+        } else if (timerValue > 0) {
+            timerElement.textContent = `Temps restant: ${timerValue}s`;
+            timerValue--;
+        } else {
+            timerElement.textContent = "Temps écoulé!";
+            checkcol=true;
+            clearInterval(timerInterval);
+        }
+    }, 1000);
+}
+
+
+
+function commencerNiveau() {
+    c.addingScore();
+    initialiserNiveau();
+    c.resetForNextLevel();
+    initObstacles(niveau); 
+    requestAnimationFrame(mainLoop);
+    afficher_timer(niveau); // Démarrer le timer pour ce niveau
+}
+
 function afficherCompteur() {
     const countdownElement = document.getElementById('countdown');
-    let countdownValue = 5; // Démarre à 5
-    countdownElement.style.display = 'block'; // Affiche l'élément du décompte
-
-    // Réinitialiser le texte avant de commencer le décompte
+    let countdownValue = 5;
+    countdownElement.style.display = 'block';
     countdownElement.textContent = countdownValue;
 
     const countdownInterval = setInterval(() => {
         if (countdownValue > 0) {
-            countdownElement.textContent = countdownValue; // Affiche le chiffre
-            countdownValue--; // Décrémenter le chiffre
+            countdownElement.textContent = countdownValue;
+            countdownValue--;
         } else {
-            countdownElement.textContent = "GO!"; // Affiche "GO!" à la fin du décompte
-            clearInterval(countdownInterval); // Arrêter le décompte
+            countdownElement.textContent = "GO!";
+            clearInterval(countdownInterval);
             setTimeout(() => {
-                countdownElement.style.display = 'none'; // Cache le décompte après 1 seconde
-                commencerNiveau(); // Démarrer le niveau après le décompte
+                countdownElement.style.display = 'none';
+                commencerNiveau(); // Démarrer le niveau après le compte à rebours
             }, 1000);
         }
-    }, 1000); // Intervalle de 1 seconde
+    }, 1000);
 }
 
-// Fonction pour commencer le niveau
-function commencerNiveau() {
-    // Initialiser le niveau
-    c.addingScore();
-    initialiserNiveau();
-    c.resetForNextLevel();
-    initObstacles(niveau); // Charger les obstacles pour le niveau suivant
-    // Démarrer la boucle principale après le compte à rebours
-    requestAnimationFrame(mainLoop);
-}
-
-// La boucle principale du jeu
 function mainLoop() {
     ctx.clearRect(0, 0, w, h);
     afficheNiveau(niveau);
