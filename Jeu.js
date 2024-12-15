@@ -3,7 +3,7 @@ var obstacles = [];
 var players=[];
 var keys = {}; //Suivi des touches pressées
 var win = 0; //Variable de victoire (0 = pas de victoire, 1 = victoire)
-var niveau=7;
+var niveau=1;
 var dernier_niv=20;
 var c;
 var ingame;
@@ -249,16 +249,20 @@ class ExitGate{
             if (this.Listeplayers.length === players.length) {
                 checkcol = true;
             }
+        }
+    }
+    addingScore(){
+        if(players.length===1){players[0].score+=1;}
+        else{
             var pointmax =3;
-            if(players.length===1){players[0].score+=1;}
-            else{
-                for(let i=0;i<this.Listeplayers.length;i++){
-                    this.Listeplayers[i].score=pointmax;
-                    pointmax--;
-                    //console.log(this.Listeplayers[i].name,this.Listeplayers[i].score);
-                }
+            for(let i=0;i<this.Listeplayers.length;i++){
+                this.Listeplayers[i].score+=pointmax;
+                pointmax--;
             }
         }
+        players.forEach((player, index) => {
+            document.getElementById(`scorePlayer${index + 1}`).textContent = `Joueur ${index + 1}: ${player.score}`;
+        });
     }
     resetForNextLevel() {
         this.Listeplayers=[];
@@ -314,6 +318,76 @@ window.onload = function init() {
         keys[e.key] = false;
     });
 };
+
+document.addEventListener('DOMContentLoaded', function () {
+    const menu = document.getElementById('menu');
+    const game = document.getElementById('game');
+    const playersSelect = document.getElementById('players');
+    const playerColorsDiv = document.getElementById('playerColors');
+    const startGameButton = document.getElementById('startGame');
+    const exitButton = document.getElementById('ExitButton'); 
+        function generatePlayerColorOptions(numPlayers) {
+        playerColorsDiv.innerHTML = ''; 
+        const predefinedColors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00'];
+        for (let i = 1; i <= numPlayers; i++) {
+            const label = document.createElement('label');
+            label.innerText = `Couleur du Joueur ${i}: `;
+            
+            const input = document.createElement('input');
+            input.type = 'color';
+            input.id = `colorPlayer${i}`;
+            input.name = `colorPlayer${i}`;
+            input.value = predefinedColors[i - 1];
+            
+            playerColorsDiv.appendChild(label);
+            playerColorsDiv.appendChild(input);
+            playerColorsDiv.appendChild(document.createElement('br'));
+        }
+    }
+
+    playersSelect.addEventListener('change', function () {
+        generatePlayerColorOptions(playersSelect.value);
+    });
+
+    generatePlayerColorOptions(playersSelect.value);
+    startGameButton.addEventListener('click', function () {
+        const numPlayers = playersSelect.value;
+        const playerColors = [];
+        for (let i = 1; i <= numPlayers; i++) {
+            const colorInput = document.getElementById(`colorPlayer${i}`);
+            playerColors.push(colorInput.value);
+        }
+
+        menu.style.display = 'none';
+        game.style.display = 'block';
+        
+        initGame(numPlayers, playerColors);
+
+        exitButton.style.display = 'block';
+    });
+
+    function initGame(numPlayers, playerColors) {
+        
+        players = [];  
+        for (let i = 0; i < numPlayers; i++) {
+            players.push(new Player(i + 1, `Joueur ${i + 1}`, 20 + i * 30, 20, playerColors[i]));
+            const scoreElement = document.getElementById(`scorePlayer${i + 1}`);
+            scoreElement.style.display="block";
+        }
+        
+        c = new ExitGate(w / 2, h / 2, 25);  
+        mainLoop();
+    }
+
+});
+
+/*exitButton.addEventListener('click', function () {
+    game.style.display = 'none';
+    menu.style.display = 'block';
+    exitButton.style.display = 'none';
+    ingame = false;  
+    cancelAnimationFrame(mainLoop);  
+});  ///ne marche pas */ 
 
 document.addEventListener('DOMContentLoaded', function () {
     const menu = document.getElementById('menu');
@@ -383,42 +457,6 @@ function drawRect(x, y, width, height, c) {
     ctx.fillStyle = c;
     ctx.fillRect(x-1/2*width, y-1/2*height, width, height);
     ctx.restore();
-}
-
-function Menu(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("Course Cube", w / 2, h / 2 - 50);
-    ctx.restore();
-
-    const startButton = document.getElementById("StartButton");
-    const exitButton = document.getElementById("ExitButton");
-    startButton.style.display = "block";
-    exitButton.style.display = "block";
-
-    startButton.addEventListener("click", function() {
-        ingame=true;
-        mainLoop();
-        
-    });
-    exitButton.addEventListener("click", function() {
-        ingame=false;
-        exitgame();
-    });
-}
-
-function exitgame(){//inutile
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "blue";
-    ctx.textAlign = "center";
-    ctx.fillText("C fini", w / 2, h / 2 - 50);
-    ctx.restore();
-    cancelAnimationFrame(mainLoop);//inutile
 }
 
 function initObstacles(niveau) {
@@ -635,12 +673,11 @@ function initObstacles(niveau) {
     }
 }
 
-function afficheNiveau(niveau) {//inutile
-    ctx.save();
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "blue";
-    ctx.fillText(`Niveau : ${niveau}`, 10, 30);
-    ctx.restore();
+function afficheNiveau(niveau) {
+    // Sélectionner l'élément HTML où afficher le niveau
+    const niveauDisplay = document.getElementById("niveauDisplay");
+    // Mettre à jour son contenu avec le niveau
+    niveauDisplay.textContent = `Niveau : ${niveau}`;
 }
 
 function updateCountdown() {//il faut l'afficher
@@ -667,7 +704,6 @@ function mainLoop() {
     if (countdownValue > 0) {
         return;
     }
-    
     c.draw();
     c.moving();
     players.forEach(player => {
@@ -692,29 +728,34 @@ function mainLoop() {
     
     if (checkcol) {
         ctx.save();
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "blue";
+        ctx.font = "bold 40px 'Press Start 2P', Roboto"; 
+        ctx.fillStyle = "#00ffcc";
         ctx.textAlign = "center";
+        ctx.shadowColor = "black";
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 4;
+        ctx.shadowBlur = 5;
         ctx.fillText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
-        ctx.restore();
-
+        ctx.strokeText(`Niveau ${niveau} terminé !`, w / 2, h / 2);
+        
+        ctx.restore(); 
         setTimeout(() => {
-            //passer au niveau suivant
+            // Passer au niveau suivant
             niveau++;
             if (niveau > dernier_niv) {
                 console.log("Félicitations, vous avez terminé le jeu !");
                 ctx.clearRect(0, 0, w, h);
                 ctx.save();
-                ctx.font = "40px Arial";
+                ctx.font = "40px Roboto";
                 ctx.fillStyle = "green";
                 ctx.textAlign = "center";
                 ctx.fillText("Félicitations, vous avez terminé le jeu !", w / 2, h / 2);
                 ctx.restore();
-                return; //arrêter le jeu
+                return; // Arrêter le jeu
             }
 
             //initialiser le niveau suivant
-            
+            c.addingScore();
             initialiserNiveau();
             c.resetForNextLevel();
             initObstacles(niveau); //charger les obstacles pour le niveau suivant
