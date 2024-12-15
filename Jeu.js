@@ -2,14 +2,12 @@ var canvas, ctx, w, h;
 var obstacles = [];
 var players=[];
 var keys = {}; //Suivi des touches pressées
-var win = 0; //Variable de victoire (0 = pas de victoire, 1 = victoire)
 var niveau=1;
 var dernier_niv=20;
 var c;
 var ingame;
 var timerValue;
 var checkcol=false;//variable pour detecter une collision
-var count=0;
 const countdownElement = document.getElementById('countdown'); // Ajoutez cet élément HTML dans votre page
 let countdownValue = 5; // Exemple : compte à rebours de 3 secondes
 let controls = [
